@@ -1,73 +1,89 @@
-# Welcome to your Lovable project
+# Career Translator
 
-## Project info
+Career Translator is an AI-powered full-stack web application that converts simple Roman Hindi career descriptions into professional resume content.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+The goal of this project is to help users easily create professional resumes even if they cannot write formal English. Users simply explain their career, skills, education, and projects in their own words, and the system automatically transforms the text into structured resume sections.
 
-## How can I edit this code?
+PROJECT: https://romanhindi-resume-generator.lovable.app
 
-There are several ways of editing your application.
+## Problem
 
-**Use Lovable**
+Many people struggle to write professional resumes because they are not comfortable writing in formal English. However, they can easily describe their work and skills in their own language.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Career Translator solves this problem by converting informal career descriptions into professional HR-ready language.
 
-Changes made via Lovable will be committed automatically to this repo.
+## How It Works
 
-**Use your preferred IDE**
+1. User writes a description of their career in Roman Hindi.
+2. User selects a target role (Data Analyst, AI Product Builder, Frontend Developer, etc.).
+3. The AI processes the text and extracts relevant information.
+4. The system generates structured resume sections.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Output includes:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+* Professional Summary
+* Technical Skills
+* Projects / Experience
+* Education
+* Additional Information
 
-Follow these steps:
+Users can then download the generated resume as a PDF.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Features
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+* Roman Hindi → Professional English transformation
+* AI-powered resume generation
+* Structured resume sections
+* Modern neon-style UI
+* Resume PDF download
+* Role-based resume generation
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Tech Stack
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Frontend
+React.js
+Tailwind CSS
 
-**Edit a file directly in GitHub**
+Backend
+Node.js
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Database
+PostgreSQL
 
-**Use GitHub Codespaces**
+AI Processing
+Text rewriting and information extraction
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Example Input
 
-## What technologies are used for this project?
+mera naam rahul hai aur maine delhi university se bsc computer science ki degree li hai. mujhe data analysis aur web development mein interest hai aur maine python, sql aur react se projects banaye hain.
 
-This project is built with:
+## Example Output
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Professional Summary
+Motivated Computer Science graduate with experience in data analysis and web development.
 
-## How can I deploy this project?
+Skills
+Python, SQL, React, Tailwind CSS, Node.js
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Projects
+Built data dashboards and developed responsive web applications.
 
-## Can I connect a custom domain to my Lovable project?
+Education
+B.Sc. Computer Science – Delhi University
 
-Yes, you can!
+## Purpose of the Project
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The purpose of this project is to simplify resume creation using AI. Instead of requiring users to write professionally structured resumes, the system allows them to describe their career naturally and automatically converts it into a professional format.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Future Improvements
+
+* Multiple resume templates
+* LinkedIn profile generator
+* Interview answer generator
+* Resume score and feedback system
+* Cover letter generation
+
+## Author
+
+Mohd Kaif
+AI Product Builder | DATA SCIENCE | DATA ANALYST | GEN AI
