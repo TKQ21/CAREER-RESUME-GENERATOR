@@ -21,6 +21,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
   const [pages, setPages] = useState(1);
 
   const pageRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [previewScale, setPreviewScale] = useState(1);
 
