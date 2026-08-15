@@ -39,12 +39,13 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
   useLayoutEffect(() => {
     if (!autoFit) return;
     const el = pageRef.current;
-    if (!el) return;
+    const content = contentRef.current;
+    if (!el || !content) return;
 
     const candidates = [1.02, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
     const measure = (s: number) => {
       el.style.setProperty("--resume-scale", String(s));
-      return Math.max(1, Math.ceil(el.scrollHeight / FIT_HEIGHT));
+      return Math.max(1, Math.ceil(content.scrollHeight / FIT_HEIGHT));
     };
 
     const minPages = measure(candidates[candidates.length - 1]);
@@ -60,13 +61,14 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     setScale(best);
   }, [autoFit, data, template]);
 
-
   useLayoutEffect(() => {
     const el = pageRef.current;
-    if (!el) return;
+    const content = contentRef.current;
+    if (!el || !content) return;
     el.style.setProperty("--resume-scale", String(scale));
-    setPages(Math.max(1, Math.ceil(el.scrollHeight / FIT_HEIGHT)));
+    setPages(Math.max(1, Math.ceil(content.scrollHeight / FIT_HEIGHT)));
   }, [scale, data, template]);
+
 
   const Template =
     template === "modern" ? ModernTemplate : template === "compact" ? CompactTemplate : ClassicTemplate;
@@ -136,8 +138,11 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
           }}
         >
           <div ref={pageRef} className="resume-sheet shadow-2xl">
-            <Template data={data} />
+            <div ref={contentRef}>
+              <Template data={data} />
+            </div>
           </div>
+
         </div>
       </div>
 
