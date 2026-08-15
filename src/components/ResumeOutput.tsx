@@ -34,25 +34,31 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Auto-fit: shrink typography so content lands cleanly inside whole pages
+  // Auto-fit: pick the largest typography scale that still uses the fewest A4 pages
   useLayoutEffect(() => {
     if (!autoFit) return;
     const el = pageRef.current;
     if (!el) return;
 
-    let best = 1;
-    for (const candidate of [1, 0.96, 0.92, 0.88, 0.84, 0.8, 0.76, 0.72]) {
-      el.style.setProperty("--resume-scale", String(candidate));
-      const h = el.scrollHeight;
-      const pageCount = Math.max(1, Math.ceil(h / A4_HEIGHT));
-      const slack = pageCount * A4_HEIGHT - h;
-      best = candidate;
-      // Accept when content is not just barely spilling onto a new page
-      if (slack > A4_HEIGHT * 0.12) break;
+    const candidates = [1.02, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
+    const measure = (s: number) => {
+      el.style.setProperty("--resume-scale", String(s));
+      return Math.max(1, Math.ceil((el.scrollHeight - 4) / A4_HEIGHT));
+    };
+
+    const minPages = measure(candidates[candidates.length - 1]);
+    let best = candidates[candidates.length - 1];
+    for (const c of candidates) {
+      if (measure(c) <= minPages) {
+        best = c;
+        break;
+      }
     }
+
     el.style.setProperty("--resume-scale", String(best));
     setScale(best);
   }, [autoFit, data, template]);
+
 
   useLayoutEffect(() => {
     const el = pageRef.current;
