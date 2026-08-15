@@ -51,10 +51,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        paper: "hsl(var(--paper))",
+        ink: "hsl(var(--ink))",
         neon: {
           pink: "hsl(var(--neon-pink))",
           orange: "hsl(var(--neon-orange))",
         },
+
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
