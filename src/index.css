@@ -116,8 +116,10 @@
   color: hsl(var(--ink));
 }
 
-.resume-page {
-  min-height: 1123px;
+@media screen {
+  .resume-sheet {
+    min-height: 1123px;
+  }
 }
 
 .resume-block,
@@ -161,9 +163,6 @@
   }
   .resume-sheet {
     box-shadow: none !important;
-  }
-  .resume-page {
-    min-height: 0 !important;
   }
   .no-print,
   .scanline {
