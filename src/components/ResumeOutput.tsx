@@ -8,6 +8,7 @@ export type { ResumeData } from "./resume/types";
 
 const A4_WIDTH = 794; // px @96dpi
 const A4_HEIGHT = 1123;
+const FIT_HEIGHT = 1075; // usable height, leaves print-rounding slack
 
 interface ResumeOutputProps {
   data: ResumeData;
@@ -43,7 +44,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     const candidates = [1.02, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
     const measure = (s: number) => {
       el.style.setProperty("--resume-scale", String(s));
-      return Math.max(1, Math.ceil((el.scrollHeight - 4) / A4_HEIGHT));
+      return Math.max(1, Math.ceil(el.scrollHeight / FIT_HEIGHT));
     };
 
     const minPages = measure(candidates[candidates.length - 1]);
@@ -64,7 +65,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     const el = pageRef.current;
     if (!el) return;
     el.style.setProperty("--resume-scale", String(scale));
-    setPages(Math.max(1, Math.ceil(el.scrollHeight / A4_HEIGHT)));
+    setPages(Math.max(1, Math.ceil(el.scrollHeight / FIT_HEIGHT)));
   }, [scale, data, template]);
 
   const Template =
