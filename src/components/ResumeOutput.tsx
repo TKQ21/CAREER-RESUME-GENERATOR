@@ -8,7 +8,7 @@ export type { ResumeData } from "./resume/types";
 
 const A4_WIDTH = 794; // px @96dpi
 const A4_HEIGHT = 1123;
-const FIT_HEIGHT = 1075; // usable height, leaves print-rounding slack
+const FIT_HEIGHT = 1040; // usable height, leaves print-rounding slack
 
 interface ResumeOutputProps {
   data: ResumeData;
