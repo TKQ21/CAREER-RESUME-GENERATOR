@@ -37,38 +37,49 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
   }, []);
 
   // Auto-fit: pick the largest typography scale that still uses the fewest A4 pages
-  useLayoutEffect(() => {
-    if (!autoFit) return;
-    const el = pageRef.current;
-    const content = contentRef.current;
-    if (!el || !content) return;
+  useEffect(() => {
+    let cancelled = false;
 
-    const candidates = [1.02, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
-    const measure = (s: number) => {
+    const measurePages = (el: HTMLElement, content: HTMLElement, s: number) => {
       el.style.setProperty("--resume-scale", String(s));
-      return Math.max(1, Math.ceil(content.scrollHeight / FIT_HEIGHT));
+      void content.offsetHeight; // force reflow
+      return Math.max(1, Math.ceil(content.getBoundingClientRect().height / FIT_HEIGHT));
     };
 
-    const minPages = measure(candidates[candidates.length - 1]);
-    let best = candidates[candidates.length - 1];
-    for (const c of candidates) {
-      if (measure(c) <= minPages) {
-        best = c;
-        break;
+    const run = async () => {
+      await document.fonts?.ready;
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      if (cancelled) return;
+      const el = pageRef.current;
+      const content = contentRef.current;
+      if (!el || !content) return;
+
+      if (!autoFit) {
+        el.style.setProperty("--resume-scale", String(scale));
+        setPages(measurePages(el, content, scale));
+        return;
       }
-    }
 
-    el.style.setProperty("--resume-scale", String(best));
-    setScale(best);
-  }, [autoFit, data, template]);
+      const candidates = [1.02, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
+      const minPages = measurePages(el, content, candidates[candidates.length - 1]);
+      let best = candidates[candidates.length - 1];
+      for (const c of candidates) {
+        if (measurePages(el, content, c) <= minPages) {
+          best = c;
+          break;
+        }
+      }
+      el.style.setProperty("--resume-scale", String(best));
+      setPages(minPages);
+      setScale(best);
+    };
 
-  useLayoutEffect(() => {
-    const el = pageRef.current;
-    const content = contentRef.current;
-    if (!el || !content) return;
-    el.style.setProperty("--resume-scale", String(scale));
-    setPages(Math.max(1, Math.ceil(content.scrollHeight / FIT_HEIGHT)));
-  }, [scale, data, template]);
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [autoFit, scale, data, template]);
+
 
 
   const Template =
