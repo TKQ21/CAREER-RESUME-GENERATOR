@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const AUTO_ROLE = "auto";
 
@@ -17,11 +17,17 @@ const ROLES = [
 interface InputBoxProps {
   onGenerate: (text: string, role: string) => void;
   isLoading: boolean;
+  initialText?: string;
 }
 
-export default function InputBox({ onGenerate, isLoading }: InputBoxProps) {
-  const [text, setText] = useState("");
+export default function InputBox({ onGenerate, isLoading, initialText = "" }: InputBoxProps) {
+  const [text, setText] = useState(initialText);
   const [role, setRole] = useState(AUTO_ROLE);
+
+  useEffect(() => {
+    if (initialText) setText(initialText);
+  }, [initialText]);
+
 
   return (
     <div className="mt-8 space-y-4">
