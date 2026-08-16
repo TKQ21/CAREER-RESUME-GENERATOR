@@ -30,7 +30,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { text, role } = await req.json();
+    const { text, role, mode } = await req.json();
     if (typeof text !== "string" || text.trim().length < 5) {
       return new Response(JSON.stringify({ error: "Please provide more details about your work." }), {
         status: 400,
@@ -41,6 +41,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const isImport = mode === "import";
     const autoRole = !role || role === "auto";
     const roleLine = autoRole
       ? `The user did NOT pick a target role. Infer the single most suitable target role from their information and use it in "headline".`
@@ -57,6 +58,8 @@ STRICT RULES:
 6. Do NOT include LinkedIn-summary or interview-prep style sections.
 
 ${roleLine}
+
+${isImport ? `IMPORT MODE: The input is the raw text of an EXISTING resume the user uploaded. Preserve their real content, wording, section structure, bullet points, job titles, dates and skill groupings as faithfully as possible. Only fix grammar, translate any Hindi/Hinglish parts into English, and keep every bullet as its own bullet. Do NOT rewrite from scratch, do NOT drop sections, do NOT add anything that is not in the file.` : ""}
 
 Respond with ONLY a valid JSON object (no markdown, no commentary) shaped exactly like:
 {
