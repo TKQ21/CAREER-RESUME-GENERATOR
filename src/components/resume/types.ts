@@ -6,9 +6,13 @@ export interface ResumeEntry {
   bullets: string[];
 }
 
+export type SkillLayout = "inline" | "bullets";
+
 export interface SkillGroup {
   category: string;
   items: string[];
+  /** How the items were written in the source resume: one line (inline) or bullet list */
+  layout?: SkillLayout;
 }
 
 export interface ResumeData {
