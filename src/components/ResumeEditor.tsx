@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ResumeData, ResumeEntry } from "./resume/types";
 
 interface ResumeEditorProps {
@@ -41,14 +41,6 @@ function CommaListField({
   onChange: (values: string[]) => void;
 }) {
   const [draft, setDraft] = useState(values.join(", "));
-  const serializedValues = values.join("\u0000");
-
-  useEffect(() => {
-    const parsedDraft = parseCommaList(draft);
-    if (parsedDraft.join("\u0000") !== serializedValues) {
-      setDraft(values.join(", "));
-    }
-  }, [serializedValues]);
 
   return (
     <Field
