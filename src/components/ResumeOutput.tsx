@@ -14,11 +14,16 @@ interface ResumeOutputProps {
   data: ResumeData;
 }
 
+type PageTarget = "auto" | 1 | 2 | 3;
+const CANDIDATES = [1.06, 1.03, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
+
 export default function ResumeOutput({ data }: ResumeOutputProps) {
   const [template, setTemplate] = useState<TemplateId>("classic");
   const [scale, setScale] = useState(1);
-  const [autoFit, setAutoFit] = useState(true);
+  const [manual, setManual] = useState(false);
+  const [pageTarget, setPageTarget] = useState<PageTarget>("auto");
   const [pages, setPages] = useState(1);
+  const [note, setNote] = useState<string | null>(null);
 
   const pageRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -36,7 +41,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Auto-fit: pick the largest typography scale that still uses the fewest A4 pages
+  // Fit content into the requested page count (or the fewest possible pages)
   useEffect(() => {
     let cancelled = false;
 
@@ -54,31 +59,40 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
       const content = contentRef.current;
       if (!el || !content) return;
 
-      if (!autoFit) {
+      if (manual) {
         el.style.setProperty("--resume-scale", String(scale));
         setPages(measurePages(el, content, scale));
+        setNote(null);
         return;
       }
 
-      const candidates = [1.02, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
-      const minPages = measurePages(el, content, candidates[candidates.length - 1]);
-      let best = candidates[candidates.length - 1];
-      for (const c of candidates) {
-        if (measurePages(el, content, c) <= minPages) {
+      const smallest = CANDIDATES[CANDIDATES.length - 1];
+      const minPages = measurePages(el, content, smallest);
+      const target = pageTarget === "auto" ? minPages : Math.max(minPages, pageTarget);
+
+      let best = smallest;
+      for (const c of CANDIDATES) {
+        if (measurePages(el, content, c) <= target) {
           best = c;
           break;
         }
       }
+      const finalPages = measurePages(el, content, best);
       el.style.setProperty("--resume-scale", String(best));
-      setPages(minPages);
+      setPages(finalPages);
       setScale(best);
+      if (pageTarget !== "auto" && minPages > pageTarget) {
+        setNote(`Content ${pageTarget} page me fit nahi hota — ${minPages} page use kiye`);
+      } else {
+        setNote(null);
+      }
     };
 
     run();
     return () => {
       cancelled = true;
     };
-  }, [autoFit, scale, data, template]);
+  }, [manual, pageTarget, scale, data, template]);
 
 
 
@@ -109,35 +123,49 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
       </div>
 
       {/* Fit controls */}
-      <div className="no-print flex flex-wrap items-center gap-4 rounded-md border border-border bg-card/50 p-3">
-        <label className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={autoFit}
-            onChange={(e) => setAutoFit(e.target.checked)}
-            className="accent-primary"
-          />
-          AUTO-FIT
-        </label>
-        <div className="flex items-center gap-2 flex-1 min-w-[180px]">
-          <span className="text-xs font-mono text-muted-foreground">DENSITY</span>
-          <input
-            type="range"
-            min={0.7}
-            max={1.1}
-            step={0.02}
-            value={scale}
-            onChange={(e) => {
-              setAutoFit(false);
-              setScale(Number(e.target.value));
-            }}
-            className="flex-1 accent-primary"
-          />
+      <div className="no-print space-y-3 rounded-md border border-border bg-card/50 p-3">
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="text-xs font-mono text-muted-foreground">PAGES</span>
+          <div className="flex gap-2">
+            {(["auto", 1, 2, 3] as PageTarget[]).map((p) => (
+              <button
+                key={String(p)}
+                onClick={() => {
+                  setManual(false);
+                  setPageTarget(p);
+                }}
+                className={`px-3 py-1 rounded-md text-xs font-mono border transition-all ${
+                  !manual && pageTarget === p
+                    ? "neon-border text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/60"
+                }`}
+              >
+                {p === "auto" ? "AUTO" : p}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 flex-1 min-w-[180px]">
+            <span className="text-xs font-mono text-muted-foreground">DENSITY</span>
+            <input
+              type="range"
+              min={0.7}
+              max={1.1}
+              step={0.02}
+              value={scale}
+              onChange={(e) => {
+                setManual(true);
+                setScale(Number(e.target.value));
+              }}
+              className="flex-1 accent-primary"
+            />
+          </div>
+          <span className="text-xs font-mono text-primary">
+            {pages} PAGE{pages > 1 ? "S" : ""} · A4
+          </span>
         </div>
-        <span className="text-xs font-mono text-primary">
-          {pages} PAGE{pages > 1 ? "S" : ""} · A4
-        </span>
+        {note && <p className="text-xs font-mono text-accent">{note}</p>}
       </div>
+
 
       {/* Preview */}
       <div ref={wrapperRef} className="overflow-hidden">
