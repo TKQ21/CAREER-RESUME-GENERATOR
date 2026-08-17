@@ -51,12 +51,18 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
       {data.skills.length > 0 && (
         <section>
           <SectionTitle>Skills</SectionTitle>
-          <div className="space-y-[3px]">
+          <div className="space-y-2">
             {data.skills.map((g, i) => (
-              <p key={i} className="text-[11px] leading-[1.45]">
-                <span className="font-bold">{g.category}: </span>
-                {g.items.join(" • ")}
-              </p>
+              <div key={i} className="resume-block text-[11px] leading-[1.45]">
+                <p className="font-bold">{g.category}</p>
+                <ul className="grid grid-cols-2 gap-x-5">
+                  {g.items.map((item, j) => (
+                    <li key={j} className="pl-3 relative">
+                      <span className="absolute left-0">•</span>{item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </section>

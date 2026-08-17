@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ResumeData, ResumeEntry } from "./resume/types";
 
 interface ResumeEditorProps {
@@ -24,6 +25,40 @@ function Field({
       <span className="block text-[10px] font-mono text-muted-foreground mb-1">{label}</span>
       <input className={inputCls} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
     </label>
+  );
+}
+
+const parseCommaList = (value: string) =>
+  value.split(",").map((item) => item.trim()).filter(Boolean);
+
+function CommaListField({
+  label,
+  values,
+  onChange,
+}: {
+  label: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+}) {
+  const [draft, setDraft] = useState(values.join(", "));
+  const serializedValues = values.join("\u0000");
+
+  useEffect(() => {
+    const parsedDraft = parseCommaList(draft);
+    if (parsedDraft.join("\u0000") !== serializedValues) {
+      setDraft(values.join(", "));
+    }
+  }, [serializedValues]);
+
+  return (
+    <Field
+      label={label}
+      value={draft}
+      onChange={(value) => {
+        setDraft(value);
+        onChange(parseCommaList(value));
+      }}
+    />
   );
 }
 
@@ -137,15 +172,10 @@ export default function ResumeEditor({ data, onChange }: ResumeEditorProps) {
         <Field label="HEADLINE" value={data.headline} onChange={(v) => set("headline", v)} />
       </div>
 
-      <Field
+      <CommaListField
         label="CONTACT (comma separated)"
-        value={data.contact.join(", ")}
-        onChange={(v) =>
-          set(
-            "contact",
-            v.split(",").map((s) => s.trim()).filter(Boolean),
-          )
-        }
+        values={data.contact}
+        onChange={(values) => set("contact", values)}
       />
 
       <label className="block">
@@ -166,16 +196,11 @@ export default function ResumeEditor({ data, onChange }: ResumeEditorProps) {
               value={g.category}
               onChange={(v) => set("skills", data.skills.map((s, j) => (j === i ? { ...s, category: v } : s)))}
             />
-            <Field
+            <CommaListField
               label="ITEMS (comma separated)"
-              value={g.items.join(", ")}
-              onChange={(v) =>
-                set(
-                  "skills",
-                  data.skills.map((s, j) =>
-                    j === i ? { ...s, items: v.split(",").map((x) => x.trim()).filter(Boolean) } : s,
-                  ),
-                )
+              values={g.items}
+              onChange={(items) =>
+                set("skills", data.skills.map((s, j) => (j === i ? { ...s, items } : s)))
               }
             />
             <button
