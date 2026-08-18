@@ -67,14 +67,16 @@ Respond with ONLY a valid JSON object (no markdown, no commentary) shaped exactl
   "headline": "Role-focused headline, e.g. 'AI Application Developer | Generative AI Engineer'",
   "contact": ["phone", "email", "linkedin url", "github url", "portfolio url"],
   "summary": "3-4 line professional summary",
-  "skills": [{ "category": "Programming/Frontend", "items": ["Python", "React.js"] }],
+  "skills": [{ "category": "Programming/Frontend", "items": ["Python", "React.js"], "layout": "inline" }],
   "experience": [{ "title": "Company — Role", "subtitle": "optional", "location": "City, Country", "dates": "MM/YYYY – MM/YYYY", "bullets": ["impact-focused bullet"] }],
   "projects": [{ "title": "Project name — one-line descriptor", "location": "optional", "dates": "optional", "bullets": ["what was built, tech used, outcome"] }],
   "education": [{ "title": "Degree", "subtitle": "Institution", "dates": "years", "bullets": ["optional detail like CGPA if given"] }],
   "certifications": ["certification name"]
 }
 
-Rules for fields: omit array items you have no information for (return empty arrays). Group skills into 3-6 labelled categories. Each experience/project should have 3-6 bullets when the input supports it, each bullet one sentence starting with a strong action verb.`;
+Rules for fields: omit array items you have no information for (return empty arrays). Group skills into 3-6 labelled categories. Each experience/project should have 3-6 bullets when the input supports it, each bullet one sentence starting with a strong action verb.
+
+SKILLS LAYOUT: for every skill group set "layout" to how it appeared in the source text — "inline" if the items were written horizontally on one line (comma/slash/pipe separated), or "bullets" if each item was on its own line / had its own bullet marker. If unsure, use "inline".`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -131,9 +133,10 @@ Rules for fields: omit array items you have no information for (return empty arr
       summary: String(parsed.summary ?? "").trim(),
       skills: Array.isArray(parsed.skills)
         ? parsed.skills
-            .map((g: { category?: string; items?: unknown }) => ({
+            .map((g: { category?: string; items?: unknown; layout?: string }) => ({
               category: String(g?.category ?? "Skills").trim(),
               items: Array.isArray(g?.items) ? g.items.map((i) => String(i).trim()).filter(Boolean) : [],
+              layout: g?.layout === "bullets" ? "bullets" : "inline",
             }))
             .filter((g) => g.items.length > 0)
         : [],
