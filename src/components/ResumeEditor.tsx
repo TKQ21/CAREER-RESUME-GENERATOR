@@ -195,6 +195,25 @@ export default function ResumeEditor({ data, onChange }: ResumeEditorProps) {
                 set("skills", data.skills.map((s, j) => (j === i ? { ...s, items } : s)))
               }
             />
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono text-muted-foreground">LAYOUT</span>
+              {(["inline", "bullets"] as const).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() =>
+                    set("skills", data.skills.map((s, j) => (j === i ? { ...s, layout: l } : s)))
+                  }
+                  className={`text-[10px] font-mono px-2 py-1 rounded border transition-colors ${
+                    (g.layout ?? "inline") === l
+                      ? "border-primary text-primary"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {l === "inline" ? "Horizontal" : "Bullets"}
+                </button>
+              ))}
+            </div>
             <button
               type="button"
               onClick={() => set("skills", data.skills.filter((_, j) => j !== i))}
