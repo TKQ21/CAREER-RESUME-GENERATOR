@@ -61,13 +61,17 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
                 {data.skills.map((g, i) => (
                   <div key={i} className="resume-block">
                     <p className="text-[10.5px] font-bold">{g.category}</p>
-                    <ul className="mt-[2px] space-y-[2px] text-[10px] leading-[1.4] text-ink/80">
-                      {g.items.map((item, j) => (
-                        <li key={j} className="pl-3 relative">
-                          <span className="absolute left-0">•</span>{item}
-                        </li>
-                      ))}
-                    </ul>
+                    {g.layout === "bullets" ? (
+                      <ul className="mt-[2px] space-y-[2px] text-[10px] leading-[1.4] text-ink/80">
+                        {g.items.map((item, j) => (
+                          <li key={j} className="pl-3 relative">
+                            <span className="absolute left-0">•</span>{item}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-[2px] text-[10px] leading-[1.4] text-ink/80">{g.items.join(", ")}</p>
+                    )}
                   </div>
                 ))}
               </div>

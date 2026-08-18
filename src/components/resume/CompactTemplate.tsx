@@ -62,14 +62,23 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
           <SectionTitle>Skills</SectionTitle>
           {data.skills.map((g, i) => (
             <div key={i} className="resume-block text-[10.5px] leading-[1.4] mb-1">
-              <p className="font-bold">{g.category}</p>
-              <ul className="grid grid-cols-3 gap-x-4">
-                {g.items.map((item, j) => (
-                  <li key={j} className="pl-3 relative">
-                    <span className="absolute left-0">▪</span>{item}
-                  </li>
-                ))}
-              </ul>
+              {g.layout === "bullets" ? (
+                <>
+                  <p className="font-bold">{g.category}</p>
+                  <ul className="grid grid-cols-3 gap-x-4">
+                    {g.items.map((item, j) => (
+                      <li key={j} className="pl-3 relative">
+                        <span className="absolute left-0">▪</span>{item}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <p>
+                  <span className="font-bold">{g.category}: </span>
+                  {g.items.join(", ")}
+                </p>
+              )}
             </div>
           ))}
         </section>
