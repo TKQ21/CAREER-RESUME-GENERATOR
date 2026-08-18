@@ -76,7 +76,12 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
               ) : (
                 <p>
                   <span className="font-bold">{g.category}: </span>
-                  {g.items.join(", ")}
+                  {g.items.map((item, j) => (
+                    <span key={j}>
+                      {j > 0 && <span className="mx-[5px]">▪</span>}
+                      {item}
+                    </span>
+                  ))}
                 </p>
               )}
             </div>

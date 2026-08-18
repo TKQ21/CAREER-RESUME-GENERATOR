@@ -68,7 +68,12 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                 ) : (
                   <p>
                     <span className="font-bold">{g.category}: </span>
-                    {g.items.join(", ")}
+                    {g.items.map((item, j) => (
+                      <span key={j}>
+                        {j > 0 && <span className="mx-[6px]">•</span>}
+                        {item}
+                      </span>
+                    ))}
                   </p>
                 )}
               </div>
