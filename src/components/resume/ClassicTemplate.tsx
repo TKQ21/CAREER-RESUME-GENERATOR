@@ -57,7 +57,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                 {g.layout === "bullets" ? (
                   <>
                     <p className="font-bold">{g.category}</p>
-                    <ul className="grid grid-cols-2 gap-x-5">
+                    <ul className="space-y-[2px]">
                       {g.items.map((item, j) => (
                         <li key={j} className="pl-3 relative">
                           <span className="absolute left-0">•</span>{item}
@@ -68,12 +68,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                 ) : (
                   <p>
                     <span className="font-bold">{g.category}: </span>
-                    {g.items.map((item, j) => (
-                      <span key={j}>
-                        {j > 0 && <span className="mx-[6px]">•</span>}
-                        {item}
-                      </span>
-                    ))}
+                    {g.items.join(" • ")}
                   </p>
                 )}
               </div>

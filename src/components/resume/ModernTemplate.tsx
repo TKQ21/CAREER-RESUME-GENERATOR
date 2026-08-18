@@ -71,12 +71,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
                       </ul>
                     ) : (
                       <p className="mt-[2px] text-[10px] leading-[1.4] text-ink/80">
-                        {g.items.map((item, j) => (
-                          <span key={j}>
-                            {j > 0 && <span className="mx-[5px]">•</span>}
-                            {item}
-                          </span>
-                        ))}
+                        {g.items.join(" • ")}
                       </p>
                     )}
                   </div>

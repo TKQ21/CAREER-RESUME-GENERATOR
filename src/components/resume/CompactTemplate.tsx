@@ -65,7 +65,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
               {g.layout === "bullets" ? (
                 <>
                   <p className="font-bold">{g.category}</p>
-                  <ul className="grid grid-cols-3 gap-x-4">
+                  <ul className="space-y-[1px]">
                     {g.items.map((item, j) => (
                       <li key={j} className="pl-3 relative">
                         <span className="absolute left-0">▪</span>{item}
@@ -76,12 +76,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
               ) : (
                 <p>
                   <span className="font-bold">{g.category}: </span>
-                  {g.items.map((item, j) => (
-                    <span key={j}>
-                      {j > 0 && <span className="mx-[5px]">▪</span>}
-                      {item}
-                    </span>
-                  ))}
+                  {g.items.join(" ▪ ")}
                 </p>
               )}
             </div>
