@@ -1,8 +1,17 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ClassicTemplate from "./resume/ClassicTemplate";
 import ModernTemplate from "./resume/ModernTemplate";
 import CompactTemplate from "./resume/CompactTemplate";
-import { ResumeData, TEMPLATES, TemplateId } from "./resume/types";
+import ResumeStyleControls from "./ResumeStyleControls";
+import {
+  applyStyleToData,
+  DEFAULT_STYLE,
+  FONT_FAMILIES,
+  ResumeData,
+  ResumeStyle,
+  TEMPLATES,
+  TemplateId,
+} from "./resume/types";
 
 export type { ResumeData } from "./resume/types";
 
@@ -24,6 +33,22 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
   const [pageTarget, setPageTarget] = useState<PageTarget>("auto");
   const [pages, setPages] = useState(1);
   const [note, setNote] = useState<string | null>(null);
+  const [style, setStyle] = useState<ResumeStyle>(DEFAULT_STYLE);
+
+  const visibleData = useMemo(() => applyStyleToData(data, style.hidden), [data, style.hidden]);
+  const styleVars = useMemo(
+    () =>
+      ({
+        "--resume-font": FONT_FAMILIES.find((f) => f.id === style.font)?.stack,
+        "--resume-size": String(style.size),
+        "--resume-margin-x": `${style.marginX}px`,
+        "--resume-margin-y": `${style.marginY}px`,
+        "--resume-line": String(style.lineHeight),
+        "--resume-section-gap": `${style.sectionGap}px`,
+        "--resume-heading-weight": style.boldHeadings ? "700" : "500",
+      }) as React.CSSProperties,
+    [style],
+  );
 
   const pageRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
