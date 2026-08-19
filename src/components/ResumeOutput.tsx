@@ -191,6 +191,11 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
         {note && <p className="text-xs font-mono text-accent">{note}</p>}
       </div>
 
+      <ResumeStyleControls
+        style={style}
+        onChange={(s) => setStyle(s)}
+        onReset={() => setStyle(DEFAULT_STYLE)}
+      />
 
       {/* Preview */}
       <div ref={wrapperRef} className="overflow-hidden">
@@ -202,9 +207,9 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
             marginBottom: previewScale < 1 ? -(1 - previewScale) * (pages * A4_HEIGHT) : 0,
           }}
         >
-          <div ref={pageRef} className="resume-sheet shadow-2xl">
+          <div ref={pageRef} className="resume-sheet shadow-2xl" style={styleVars}>
             <div ref={contentRef}>
-              <Template data={data} />
+              <Template data={visibleData} />
             </div>
           </div>
 
