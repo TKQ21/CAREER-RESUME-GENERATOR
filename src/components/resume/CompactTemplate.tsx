@@ -1,4 +1,5 @@
-import { ResumeData, ResumeEntry, FOOTER_TEXT } from "./types";
+import { ResumeData, ResumeEntry } from "./types";
+import RichText from "./RichText";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -12,8 +13,8 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   return (
     <div className="resume-block mb-2">
       <p className="text-[11.5px]">
-        <span className="font-bold">{entry.title}</span>
-        {entry.subtitle && <span className="text-ink/75"> — {entry.subtitle}</span>}
+        <span className="font-bold"><RichText text={entry.title} /></span>
+        {entry.subtitle && <span className="text-ink/75"> — <RichText text={entry.subtitle} /></span>}
         {(entry.dates || entry.location) && (
           <span className="text-ink/60 text-[10px]">
             {"  "}
@@ -25,7 +26,7 @@ function Entry({ entry }: { entry: ResumeEntry }) {
         {entry.bullets.map((b, i) => (
           <li key={i} className="text-[10.5px] leading-[1.4] pl-3 relative">
             <span className="absolute left-0">▪</span>
-            {b}
+            <RichText text={b} />
           </li>
         ))}
       </ul>
@@ -53,7 +54,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
       {data.summary && (
         <section>
           <SectionTitle>Summary</SectionTitle>
-          <p className="text-[10.5px] leading-[1.45] text-justify">{data.summary}</p>
+          <p className="text-[10.5px] leading-[1.45] text-justify"><RichText text={data.summary} /></p>
         </section>
       )}
 
@@ -68,7 +69,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
                   <ul className="space-y-[1px]">
                     {g.items.map((item, j) => (
                       <li key={j} className="pl-3 relative">
-                        <span className="absolute left-0">▪</span>{item}
+                        <span className="absolute left-0">▪</span><RichText text={item} />
                       </li>
                     ))}
                   </ul>
@@ -117,10 +118,6 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
           <p className="text-[10.5px] leading-[1.4]">{data.certifications.join(" · ")}</p>
         </section>
       )}
-
-      <p className="resume-footer text-center text-[9px] text-ink/50 mt-5 pt-2 border-t border-ink/20">
-        {FOOTER_TEXT}
-      </p>
     </div>
   );
 }

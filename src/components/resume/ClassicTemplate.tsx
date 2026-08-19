@@ -1,4 +1,5 @@
-import { ResumeData, ResumeEntry, FOOTER_TEXT } from "./types";
+import { ResumeData, ResumeEntry } from "./types";
+import RichText from "./RichText";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -12,17 +13,17 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   return (
     <div className="resume-block mb-3">
       <div className="flex items-baseline justify-between gap-4">
-        <p className="text-[12.5px] font-bold">{entry.title}</p>
+        <p className="text-[12.5px] font-bold"><RichText text={entry.title} /></p>
         <p className="text-[10.5px] text-ink/70 whitespace-nowrap">
           {[entry.location, entry.dates].filter(Boolean).join(" | ")}
         </p>
       </div>
-      {entry.subtitle && <p className="text-[11px] italic text-ink/80">{entry.subtitle}</p>}
+      {entry.subtitle && <p className="text-[11px] italic text-ink/80"><RichText text={entry.subtitle} /></p>}
       <ul className="mt-1 space-y-[3px]">
         {entry.bullets.map((b, i) => (
           <li key={i} className="text-[11px] leading-[1.45] pl-3 relative">
             <span className="absolute left-0">•</span>
-            {b}
+            <RichText text={b} />
           </li>
         ))}
       </ul>
@@ -44,7 +45,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
       {data.summary && (
         <section>
           <SectionTitle>Summary</SectionTitle>
-          <p className="text-[11px] leading-[1.5] text-justify">{data.summary}</p>
+          <p className="text-[11px] leading-[1.5] text-justify"><RichText text={data.summary} /></p>
         </section>
       )}
 
@@ -60,7 +61,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                     <ul className="space-y-[2px]">
                       {g.items.map((item, j) => (
                         <li key={j} className="pl-3 relative">
-                          <span className="absolute left-0">•</span>{item}
+                          <span className="absolute left-0">•</span><RichText text={item} />
                         </li>
                       ))}
                     </ul>
@@ -68,7 +69,9 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                 ) : (
                   <p>
                     <span className="font-bold">{g.category}: </span>
-                    {g.items.join(" • ")}
+                    {g.items.map((item, j) => (
+                        <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
+                      ))}
                   </p>
                 )}
               </div>
@@ -111,16 +114,12 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
             {data.certifications.map((c, i) => (
               <li key={i} className="text-[11px] pl-3 relative">
                 <span className="absolute left-0">•</span>
-                {c}
+                <RichText text={c} />
               </li>
             ))}
           </ul>
         </section>
       )}
-
-      <p className="resume-footer text-center text-[9px] text-ink/50 mt-6 pt-3 border-t border-ink/20">
-        {FOOTER_TEXT}
-      </p>
     </div>
   );
 }
