@@ -117,7 +117,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     return () => {
       cancelled = true;
     };
-  }, [manual, pageTarget, scale, data, template]);
+  }, [manual, pageTarget, scale, data, template, style]);
 
 
 
