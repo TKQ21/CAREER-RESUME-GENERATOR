@@ -110,10 +110,37 @@
 /* ---------- Resume sheet + print ---------- */
 .resume-sheet {
   --resume-scale: 1;
-  font-family: 'Inter', 'Space Grotesk', Arial, sans-serif;
+  --resume-size: 1;
+  --resume-font: 'Inter', 'Space Grotesk', Arial, sans-serif;
+  --resume-margin-x: 40px;
+  --resume-margin-y: 32px;
+  --resume-line: 1.45;
+  --resume-section-gap: 12px;
+  --resume-heading-weight: 700;
+  font-family: var(--resume-font);
   font-size: calc(1rem * var(--resume-scale));
   background: hsl(var(--paper));
   color: hsl(var(--ink));
+}
+
+.resume-sheet .resume-page {
+  zoom: calc(var(--resume-scale) * var(--resume-size));
+  width: calc(794px / (var(--resume-scale) * var(--resume-size)));
+  padding: var(--resume-margin-y) var(--resume-margin-x);
+}
+
+.resume-sheet .resume-page p,
+.resume-sheet .resume-page li {
+  line-height: var(--resume-line);
+}
+
+.resume-sheet .resume-page section {
+  margin-top: var(--resume-section-gap);
+}
+
+.resume-sheet .resume-page h1,
+.resume-sheet .resume-page h2 {
+  font-weight: var(--resume-heading-weight);
 }
 
 @media screen {

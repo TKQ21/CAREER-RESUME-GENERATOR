@@ -1,8 +1,17 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ClassicTemplate from "./resume/ClassicTemplate";
 import ModernTemplate from "./resume/ModernTemplate";
 import CompactTemplate from "./resume/CompactTemplate";
-import { ResumeData, TEMPLATES, TemplateId } from "./resume/types";
+import ResumeStyleControls from "./ResumeStyleControls";
+import {
+  applyStyleToData,
+  DEFAULT_STYLE,
+  FONT_FAMILIES,
+  ResumeData,
+  ResumeStyle,
+  TEMPLATES,
+  TemplateId,
+} from "./resume/types";
 
 export type { ResumeData } from "./resume/types";
 
@@ -24,6 +33,22 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
   const [pageTarget, setPageTarget] = useState<PageTarget>("auto");
   const [pages, setPages] = useState(1);
   const [note, setNote] = useState<string | null>(null);
+  const [style, setStyle] = useState<ResumeStyle>(DEFAULT_STYLE);
+
+  const visibleData = useMemo(() => applyStyleToData(data, style.hidden), [data, style.hidden]);
+  const styleVars = useMemo(
+    () =>
+      ({
+        "--resume-font": FONT_FAMILIES.find((f) => f.id === style.font)?.stack,
+        "--resume-size": String(style.size),
+        "--resume-margin-x": `${style.marginX}px`,
+        "--resume-margin-y": `${style.marginY}px`,
+        "--resume-line": String(style.lineHeight),
+        "--resume-section-gap": `${style.sectionGap}px`,
+        "--resume-heading-weight": style.boldHeadings ? "700" : "500",
+      }) as React.CSSProperties,
+    [style],
+  );
 
   const pageRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -92,7 +117,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     return () => {
       cancelled = true;
     };
-  }, [manual, pageTarget, scale, data, template]);
+  }, [manual, pageTarget, scale, data, template, style]);
 
 
 
@@ -166,6 +191,11 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
         {note && <p className="text-xs font-mono text-accent">{note}</p>}
       </div>
 
+      <ResumeStyleControls
+        style={style}
+        onChange={(s) => setStyle(s)}
+        onReset={() => setStyle(DEFAULT_STYLE)}
+      />
 
       {/* Preview */}
       <div ref={wrapperRef} className="overflow-hidden">
@@ -177,9 +207,9 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
             marginBottom: previewScale < 1 ? -(1 - previewScale) * (pages * A4_HEIGHT) : 0,
           }}
         >
-          <div ref={pageRef} className="resume-sheet shadow-2xl">
+          <div ref={pageRef} className="resume-sheet shadow-2xl" style={styleVars}>
             <div ref={contentRef}>
-              <Template data={data} />
+              <Template data={visibleData} />
             </div>
           </div>
 
