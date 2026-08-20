@@ -4,6 +4,9 @@ export interface ResumeEntry {
   location?: string;
   dates?: string;
   bullets: string[];
+  /** Optional clickable link shown in place of / next to the subtitle */
+  linkLabel?: string;
+  linkUrl?: string;
 }
 
 export type SkillLayout = "inline" | "bullets";
