@@ -209,7 +209,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
         >
           <div ref={pageRef} className="resume-sheet shadow-2xl" style={styleVars}>
             <div ref={contentRef}>
-              <Template data={visibleData} />
+              <Template data={visibleData} titles={style.titles} />
             </div>
           </div>
 
