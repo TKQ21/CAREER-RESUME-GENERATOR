@@ -1,5 +1,5 @@
-import { ResumeData, ResumeEntry } from "./types";
-import RichText from "./RichText";
+import { ResumeData, ResumeEntry, SectionTitles, sectionTitle } from "./types";
+import RichText, { PlainLink } from "./RichText";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +19,11 @@ function Entry({ entry }: { entry: ResumeEntry }) {
         </p>
       </div>
       {entry.subtitle && <p className="text-[11px] italic text-ink/80"><RichText text={entry.subtitle} /></p>}
+      {entry.linkUrl && (
+        <p className="text-[11px] text-ink/80">
+          <PlainLink href={entry.linkUrl}>{entry.linkLabel?.trim() || "Link"}</PlainLink>
+        </p>
+      )}
       <ul className="mt-1 space-y-[3px]">
         {entry.bullets.map((b, i) => (
           <li key={i} className="text-[11px] leading-[1.45] pl-3 relative">
@@ -31,7 +36,15 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   );
 }
 
-export default function ClassicTemplate({ data }: { data: ResumeData }) {
+export default function ClassicTemplate({
+  data,
+  titles,
+}: {
+  data: ResumeData;
+  titles?: SectionTitles;
+}) {
+  const t = (k: Parameters<typeof sectionTitle>[1]) => sectionTitle(titles, k);
+
   return (
     <div className="resume-page bg-paper text-ink px-10 py-8">
       <header className="text-center">
@@ -44,14 +57,14 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
 
       {data.summary && (
         <section>
-          <SectionTitle>Summary</SectionTitle>
+          <SectionTitle>{t("summary")}</SectionTitle>
           <p className="text-[11px] leading-[1.5] text-justify"><RichText text={data.summary} /></p>
         </section>
       )}
 
       {data.skills.length > 0 && (
         <section>
-          <SectionTitle>Skills</SectionTitle>
+          <SectionTitle>{t("skills")}</SectionTitle>
           <div className="space-y-2">
             {data.skills.map((g, i) => (
               <div key={i} className="resume-block text-[11px] leading-[1.45]">
@@ -69,9 +82,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                 ) : (
                   <p>
                     <span className="font-bold">{g.category}: </span>
-                    {g.items.map((item, j) => (
-                        <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
-                      ))}
+                    <RichText text={g.items.join(", ")} />
                   </p>
                 )}
               </div>
@@ -82,7 +93,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
 
       {data.experience.length > 0 && (
         <section>
-          <SectionTitle>Experience</SectionTitle>
+          <SectionTitle>{t("experience")}</SectionTitle>
           {data.experience.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -91,7 +102,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
 
       {data.projects.length > 0 && (
         <section>
-          <SectionTitle>Projects</SectionTitle>
+          <SectionTitle>{t("projects")}</SectionTitle>
           {data.projects.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -100,7 +111,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
 
       {data.education.length > 0 && (
         <section>
-          <SectionTitle>Education</SectionTitle>
+          <SectionTitle>{t("education")}</SectionTitle>
           {data.education.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -109,7 +120,7 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
 
       {data.certifications.length > 0 && (
         <section>
-          <SectionTitle>Certifications</SectionTitle>
+          <SectionTitle>{t("certifications")}</SectionTitle>
           <ul className="space-y-[3px]">
             {data.certifications.map((c, i) => (
               <li key={i} className="text-[11px] pl-3 relative">
