@@ -30,7 +30,6 @@ export interface ResumeData {
   certifications: string[];
 }
 
-export const FOOTER_TEXT = "© 2026 Mohd Kaif | Built with AI assistance";
 
 export type TemplateId = "classic" | "modern" | "compact";
 
