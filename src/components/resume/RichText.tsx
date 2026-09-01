@@ -13,7 +13,7 @@ function normalizeHref(raw: string) {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-function PlainLink({ href, children }: { href: string; children: React.ReactNode }) {
+export function PlainLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
       href={normalizeHref(href)}
