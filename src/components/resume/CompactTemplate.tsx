@@ -1,5 +1,5 @@
-import { ResumeData, ResumeEntry } from "./types";
-import RichText from "./RichText";
+import { ResumeData, ResumeEntry, SectionTitles, sectionTitle } from "./types";
+import RichText, { PlainLink } from "./RichText";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +15,12 @@ function Entry({ entry }: { entry: ResumeEntry }) {
       <p className="text-[11.5px]">
         <span className="font-bold"><RichText text={entry.title} /></span>
         {entry.subtitle && <span className="text-ink/75"> — <RichText text={entry.subtitle} /></span>}
+        {entry.linkUrl && (
+          <span className="text-ink/75">
+            {" · "}
+            <PlainLink href={entry.linkUrl}>{entry.linkLabel?.trim() || "Link"}</PlainLink>
+          </span>
+        )}
         {(entry.dates || entry.location) && (
           <span className="text-ink/60 text-[10px]">
             {"  "}
@@ -34,7 +40,7 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   );
 }
 
-export default function CompactTemplate({ data }: { data: ResumeData }) {
+export default function CompactTemplate({ data, titles }: { data: ResumeData; titles?: SectionTitles }) {
   return (
     <div className="resume-page bg-paper text-ink px-9 py-7">
       <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink/60 pb-2">
@@ -46,21 +52,26 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
         </div>
         {data.contact.length > 0 && (
           <p className="text-[9.5px] text-ink/70 text-right leading-snug max-w-[45%]">
-            {data.contact.join(" · ")}
+            {data.contact.map((c, i) => (
+              <span key={i}>
+                {i > 0 && " · "}
+                <RichText text={c} />
+              </span>
+            ))}
           </p>
         )}
       </header>
 
       {data.summary && (
         <section>
-          <SectionTitle>Summary</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "summary")}</SectionTitle>
           <p className="text-[10.5px] leading-[1.45] text-justify"><RichText text={data.summary} /></p>
         </section>
       )}
 
       {data.skills.length > 0 && (
         <section>
-          <SectionTitle>Skills</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "skills")}</SectionTitle>
           {data.skills.map((g, i) => (
             <div key={i} className="resume-block text-[10.5px] leading-[1.4] mb-1">
               {g.layout === "bullets" ? (
@@ -77,7 +88,9 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
               ) : (
                 <p>
                   <span className="font-bold">{g.category}: </span>
-                  {g.items.join(" ▪ ")}
+                  {g.items.map((item, j) => (
+                    <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
+                  ))}
                 </p>
               )}
             </div>
@@ -87,7 +100,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
 
       {data.experience.length > 0 && (
         <section>
-          <SectionTitle>Experience</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "experience")}</SectionTitle>
           {data.experience.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -96,7 +109,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
 
       {data.projects.length > 0 && (
         <section>
-          <SectionTitle>Projects</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "projects")}</SectionTitle>
           {data.projects.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -105,7 +118,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
 
       {data.education.length > 0 && (
         <section>
-          <SectionTitle>Education</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "education")}</SectionTitle>
           {data.education.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -114,8 +127,15 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
 
       {data.certifications.length > 0 && (
         <section>
-          <SectionTitle>Certifications</SectionTitle>
-          <p className="text-[10.5px] leading-[1.4]">{data.certifications.join(" · ")}</p>
+          <SectionTitle>{sectionTitle(titles, "certifications")}</SectionTitle>
+          <ul className="space-y-[1px]">
+            {data.certifications.map((c, i) => (
+              <li key={i} className="text-[10.5px] leading-[1.4] pl-3 relative">
+                <span className="absolute left-0">▪</span>
+                <RichText text={c} />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </div>
