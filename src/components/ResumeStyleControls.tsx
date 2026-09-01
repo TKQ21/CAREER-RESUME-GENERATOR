@@ -84,19 +84,12 @@ export default function ResumeStyleControls({ style, onChange, onReset }: Props)
           </select>
         </label>
 
-        <div className="flex items-end gap-2">
-          <button
-            type="button"
-            onClick={() => set("boldHeadings", !style.boldHeadings)}
-            className={`px-3 py-2 rounded-md text-xs font-mono border transition-all ${
-              style.boldHeadings
-                ? "neon-border text-primary"
-                : "border-border text-muted-foreground hover:border-primary/60"
-            }`}
-          >
-            <span className="font-bold">B</span> Bold headings {style.boldHeadings ? "ON" : "OFF"}
-          </button>
+        <div className="flex items-end">
+          <p className="text-[10px] font-mono text-muted-foreground">
+            Headings always bold · rename sections niche
+          </p>
         </div>
+
 
         <Slider
           label="TEXT SIZE"
