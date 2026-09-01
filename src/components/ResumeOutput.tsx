@@ -45,7 +45,6 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
         "--resume-margin-y": `${style.marginY}px`,
         "--resume-line": String(style.lineHeight),
         "--resume-section-gap": `${style.sectionGap}px`,
-        "--resume-heading-weight": "700",
       }) as React.CSSProperties,
     [style],
   );

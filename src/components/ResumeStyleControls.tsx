@@ -84,6 +84,12 @@ export default function ResumeStyleControls({ style, onChange, onReset }: Props)
           </select>
         </label>
 
+        <div className="flex items-end">
+          <p className="text-[10px] font-mono text-muted-foreground">
+            Headings always bold · rename sections niche
+          </p>
+        </div>
+
 
         <Slider
           label="TEXT SIZE"
@@ -133,37 +139,46 @@ export default function ResumeStyleControls({ style, onChange, onReset }: Props)
 
       <div>
         <span className="block text-[10px] font-mono text-muted-foreground mb-2">
-          SECTIONS — naam edit karo, ya cross button se hatao / wapas lao
+          SECTIONS (tap to remove / add back)
         </span>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="flex flex-wrap gap-2">
           {SECTION_LABELS.map(({ key, label }) => {
             const on = !style.hidden.includes(key);
             return (
-              <div key={key} className="flex items-center gap-2">
-                <input
-                  value={style.titles[key] ?? ""}
-                  placeholder={label}
-                  onChange={(e) => set("titles", { ...style.titles, [key]: e.target.value })}
-                  className={`flex-1 bg-card border rounded-md px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary ${
-                    on ? "border-border text-foreground" : "border-border text-muted-foreground line-through"
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleSection(key)}
-                  className={`px-2 py-1 rounded-md text-[10px] font-mono border transition-all ${
-                    on
-                      ? "border-primary/70 text-primary"
-                      : "border-border text-muted-foreground hover:border-primary/40"
-                  }`}
-                >
-                  {on ? "ON" : "OFF"}
-                </button>
-              </div>
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleSection(key)}
+                className={`px-3 py-1 rounded-md text-xs font-mono border transition-all ${
+                  on
+                    ? "border-primary/70 text-primary"
+                    : "border-border text-muted-foreground line-through hover:border-primary/40"
+                }`}
+              >
+                {label}
+              </button>
             );
           })}
+        </div>
+      </div>
+
+      <div>
+        <span className="block text-[10px] font-mono text-muted-foreground mb-2">
+          SECTION NAMES (rename headings)
+        </span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {SECTION_LABELS.map(({ key, label }) => (
+            <input
+              key={key}
+              value={style.titles?.[key] ?? ""}
+              placeholder={label}
+              onChange={(e) => set("titles", { ...style.titles, [key]: e.target.value })}
+              className="w-full bg-card border border-border rounded-md px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          ))}
         </div>
       </div>
     </div>
   );
 }
+

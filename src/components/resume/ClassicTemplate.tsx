@@ -10,6 +10,15 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 function Entry({ entry }: { entry: ResumeEntry }) {
+  const subtitleParts: React.ReactNode[] = [];
+  if (entry.subtitle) subtitleParts.push(<RichText key="s" text={entry.subtitle} />);
+  if (entry.linkUrl)
+    subtitleParts.push(
+      <PlainLink key="l" href={entry.linkUrl}>
+        {entry.linkLabel?.trim() || "Link"}
+      </PlainLink>,
+    );
+
   return (
     <div className="resume-block mb-3">
       <div className="flex items-baseline justify-between gap-4">
@@ -18,10 +27,14 @@ function Entry({ entry }: { entry: ResumeEntry }) {
           {[entry.location, entry.dates].filter(Boolean).join(" | ")}
         </p>
       </div>
-      {entry.subtitle && <p className="text-[11px] italic text-ink/80"><RichText text={entry.subtitle} /></p>}
-      {entry.linkUrl && (
-        <p className="text-[11px] text-ink/80">
-          <PlainLink href={entry.linkUrl}>{entry.linkLabel?.trim() || "Link"}</PlainLink>
+      {subtitleParts.length > 0 && (
+        <p className="text-[11px] italic text-ink/80">
+          {subtitleParts.map((n, i) => (
+            <span key={i}>
+              {i > 0 && " · "}
+              {n}
+            </span>
+          ))}
         </p>
       )}
       <ul className="mt-1 space-y-[3px]">
@@ -36,35 +49,34 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   );
 }
 
-export default function ClassicTemplate({
-  data,
-  titles,
-}: {
-  data: ResumeData;
-  titles?: SectionTitles;
-}) {
-  const t = (k: Parameters<typeof sectionTitle>[1]) => sectionTitle(titles, k);
-
+export default function ClassicTemplate({ data, titles }: { data: ResumeData; titles?: SectionTitles }) {
   return (
     <div className="resume-page bg-paper text-ink px-10 py-8">
       <header className="text-center">
         <h1 className="text-[26px] font-bold tracking-[2px] uppercase">{data.name || "YOUR NAME"}</h1>
         {data.headline && <p className="text-[12.5px] font-semibold mt-1">{data.headline}</p>}
         {data.contact.length > 0 && (
-          <p className="text-[10.5px] text-ink/75 mt-1 leading-relaxed">{data.contact.join("  |  ")}</p>
+          <p className="text-[10.5px] text-ink/75 mt-1 leading-relaxed">
+            {data.contact.map((c, i) => (
+              <span key={i}>
+                {i > 0 && "  |  "}
+                <RichText text={c} />
+              </span>
+            ))}
+          </p>
         )}
       </header>
 
       {data.summary && (
         <section>
-          <SectionTitle>{t("summary")}</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "summary")}</SectionTitle>
           <p className="text-[11px] leading-[1.5] text-justify"><RichText text={data.summary} /></p>
         </section>
       )}
 
       {data.skills.length > 0 && (
         <section>
-          <SectionTitle>{t("skills")}</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "skills")}</SectionTitle>
           <div className="space-y-2">
             {data.skills.map((g, i) => (
               <div key={i} className="resume-block text-[11px] leading-[1.45]">
@@ -82,7 +94,9 @@ export default function ClassicTemplate({
                 ) : (
                   <p>
                     <span className="font-bold">{g.category}: </span>
-                    <RichText text={g.items.join(", ")} />
+                    {g.items.map((item, j) => (
+                        <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
+                      ))}
                   </p>
                 )}
               </div>
@@ -93,7 +107,7 @@ export default function ClassicTemplate({
 
       {data.experience.length > 0 && (
         <section>
-          <SectionTitle>{t("experience")}</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "experience")}</SectionTitle>
           {data.experience.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -102,7 +116,7 @@ export default function ClassicTemplate({
 
       {data.projects.length > 0 && (
         <section>
-          <SectionTitle>{t("projects")}</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "projects")}</SectionTitle>
           {data.projects.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -111,7 +125,7 @@ export default function ClassicTemplate({
 
       {data.education.length > 0 && (
         <section>
-          <SectionTitle>{t("education")}</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "education")}</SectionTitle>
           {data.education.map((e, i) => (
             <Entry key={i} entry={e} />
           ))}
@@ -120,7 +134,7 @@ export default function ClassicTemplate({
 
       {data.certifications.length > 0 && (
         <section>
-          <SectionTitle>{t("certifications")}</SectionTitle>
+          <SectionTitle>{sectionTitle(titles, "certifications")}</SectionTitle>
           <ul className="space-y-[3px]">
             {data.certifications.map((c, i) => (
               <li key={i} className="text-[11px] pl-3 relative">

@@ -9,40 +9,44 @@ interface ResumeEditorProps {
 const inputCls =
   "w-full bg-card border border-border rounded-md px-3 py-2 text-sm text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary transition-all";
 
-type Ctl = HTMLInputElement | HTMLTextAreaElement;
+type TextEl = HTMLInputElement | HTMLTextAreaElement;
 
-/** Wraps the current text selection with `before` / `after` (toggles ** off again). */
-function wrapSelection(el: Ctl | null, onChange: (v: string) => void, before: string, after: string) {
+function wrapSelection(el: TextEl | null, value: string, mode: "bold" | "link", onChange: (v: string) => void) {
   if (!el) return;
   const start = el.selectionStart ?? 0;
   const end = el.selectionEnd ?? 0;
   if (start === end) return;
-  const value = el.value;
-  const sel = value.slice(start, end);
-  const isBold = before === "**" && /^\*\*[\s\S]+\*\*$/.test(sel);
-  const replaced = isBold ? sel.slice(2, -2) : `${before}${sel}${after}`;
-  const next = value.slice(0, start) + replaced + value.slice(end);
+  const selected = value.slice(start, end);
+
+  let replacement: string;
+  if (mode === "bold") {
+    replacement =
+      selected.startsWith("**") && selected.endsWith("**") && selected.length > 4
+        ? selected.slice(2, -2)
+        : `**${selected}**`;
+  } else {
+    const url = window.prompt("Paste the URL (https://...)", "https://");
+    if (!url || url === "https://") return;
+    replacement = `[${selected}](${url.trim()})`;
+  }
+
+  const next = value.slice(0, start) + replacement + value.slice(end);
   onChange(next);
   requestAnimationFrame(() => {
     el.focus();
-    const offset = isBold ? -2 : before.length;
-    el.setSelectionRange(start + Math.max(0, offset), start + replaced.length - (isBold ? 0 : after.length));
+    el.setSelectionRange(start, start + replacement.length);
   });
 }
 
-function ToolBar({ el, onChange }: { el: () => Ctl | null; onChange: (v: string) => void }) {
+function FormatToolbar({ elRef, value, onChange }: { elRef: React.RefObject<TextEl>; value: string; onChange: (v: string) => void }) {
   const btn =
-    "px-2 py-[2px] rounded border border-border text-[10px] font-mono text-muted-foreground hover:text-primary hover:border-primary/60 transition-colors";
+    "px-2 py-[2px] rounded border border-border text-[10px] font-mono text-muted-foreground hover:text-primary hover:border-primary/60";
   return (
     <span className="flex gap-1">
-      <button type="button" className={btn} onClick={() => wrapSelection(el(), onChange, "**", "**")}>
+      <button type="button" className={btn} title="Bold selected text (Ctrl+B)" onClick={() => wrapSelection(elRef.current, value, "bold", onChange)}>
         <span className="font-bold">B</span>
       </button>
-      <button
-        type="button"
-        className={btn}
-        onClick={() => wrapSelection(el(), onChange, "[", "](https://paste-link-here)")}
-      >
+      <button type="button" className={btn} title="Turn selected text into a clickable link" onClick={() => wrapSelection(elRef.current, value, "link", onChange)}>
         LINK
       </button>
     </span>
@@ -54,83 +58,70 @@ function Field({
   value,
   onChange,
   placeholder,
-  rich,
+  format = true,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
-  rich?: boolean;
+  format?: boolean;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <label className="block">
-      <span className="flex items-center justify-between gap-2 text-[10px] font-mono text-muted-foreground mb-1">
+      <span className="flex items-center justify-between text-[10px] font-mono text-muted-foreground mb-1">
         <span>{label}</span>
-        {rich && <ToolBar el={() => ref.current} onChange={onChange} />}
+        {format && <FormatToolbar elRef={ref as React.RefObject<TextEl>} value={value} onChange={onChange} />}
       </span>
       <input
         ref={ref}
         className={inputCls}
         value={value}
         placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if (rich && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
             e.preventDefault();
-            wrapSelection(ref.current, onChange, "**", "**");
+            wrapSelection(e.currentTarget, value, "bold", onChange);
           }
         }}
-        onChange={(e) => onChange(e.target.value)}
       />
     </label>
   );
 }
 
-function RichArea({
+function TextAreaField({
   label,
   value,
   onChange,
-  minH = "90px",
-  onEnter,
-  onEmptyBackspace,
+  minHeight = 90,
 }: {
-  label?: string;
+  label: string;
   value: string;
   onChange: (v: string) => void;
-  minH?: string;
-  onEnter?: () => void;
-  onEmptyBackspace?: () => void;
+  minHeight?: number;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   return (
-    <div className="block w-full">
-      <span className="flex items-center justify-between gap-2 text-[10px] font-mono text-muted-foreground mb-1">
-        <span>{label ?? ""}</span>
-        <ToolBar el={() => ref.current} onChange={onChange} />
+    <label className="block">
+      <span className="flex items-center justify-between text-[10px] font-mono text-muted-foreground mb-1">
+        <span>{label}</span>
+        <FormatToolbar elRef={ref as React.RefObject<TextEl>} value={value} onChange={onChange} />
       </span>
       <textarea
         ref={ref}
         className={`${inputCls} resize-y`}
-        style={{ minHeight: minH }}
+        style={{ minHeight }}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
             e.preventDefault();
-            wrapSelection(ref.current, onChange, "**", "**");
-            return;
-          }
-          if (onEnter && e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            onEnter();
-          }
-          if (onEmptyBackspace && e.key === "Backspace" && value === "") {
-            e.preventDefault();
-            onEmptyBackspace();
+            wrapSelection(e.currentTarget, value, "bold", onChange);
           }
         }}
       />
-    </div>
+    </label>
   );
 }
 
@@ -152,7 +143,6 @@ function CommaListField({
     <Field
       label={label}
       value={draft}
-      rich
       onChange={(value) => {
         setDraft(value);
         onChange(parseCommaList(value));
@@ -161,39 +151,84 @@ function CommaListField({
   );
 }
 
-function BulletEditor({ bullets, onChange }: { bullets: string[]; onChange: (b: string[]) => void }) {
+function BulletRow({
+  value,
+  onChange,
+  onEnter,
+  onBackspaceEmpty,
+  onRemove,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onEnter: () => void;
+  onBackspaceEmpty: () => void;
+  onRemove: () => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
   return (
-    <div className="space-y-2">
-      <span className="block text-[10px] font-mono text-muted-foreground">BULLET POINTS</span>
-      {bullets.map((b, i) => (
-        <div key={i} className="flex items-start gap-2">
-          <span className="text-primary font-mono pt-6">•</span>
-          <RichArea
-            value={b}
-            minH="52px"
-            onChange={(v) => {
-              const next = [...bullets];
-              next[i] = v;
-              onChange(next);
-            }}
-            onEnter={() => {
-              const next = [...bullets];
-              next.splice(i + 1, 0, "");
-              onChange(next);
-            }}
-            onEmptyBackspace={() => {
-              if (bullets.length > 1) onChange(bullets.filter((_, j) => j !== i));
-            }}
-          />
+    <div className="space-y-1">
+      <div className="flex items-start gap-2">
+        <span className="text-primary font-mono pt-2">•</span>
+        <textarea
+          ref={ref}
+          className={`${inputCls} min-h-[52px] resize-y`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+              e.preventDefault();
+              wrapSelection(e.currentTarget, value, "bold", onChange);
+              return;
+            }
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onEnter();
+            }
+            if (e.key === "Backspace" && value === "") {
+              e.preventDefault();
+              onBackspaceEmpty();
+            }
+          }}
+        />
+        <div className="flex flex-col items-end gap-1 pt-1">
+          <FormatToolbar elRef={ref as React.RefObject<TextEl>} value={value} onChange={onChange} />
           <button
             type="button"
-            onClick={() => onChange(bullets.filter((_, j) => j !== i))}
-            className="text-muted-foreground hover:text-destructive font-mono text-xs pt-6"
+            onClick={onRemove}
+            className="text-muted-foreground hover:text-destructive font-mono text-xs"
             aria-label="Remove bullet"
           >
             ✕
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function BulletEditor({ bullets, onChange }: { bullets: string[]; onChange: (b: string[]) => void }) {
+  return (
+    <div className="space-y-2">
+      <span className="block text-[10px] font-mono text-muted-foreground">BULLET POINTS</span>
+      {bullets.map((b, i) => (
+        <BulletRow
+          key={i}
+          value={b}
+          onChange={(v) => {
+            const next = [...bullets];
+            next[i] = v;
+            onChange(next);
+          }}
+          onEnter={() => {
+            const next = [...bullets];
+            next.splice(i + 1, 0, "");
+            onChange(next);
+          }}
+          onBackspaceEmpty={() => {
+            if (bullets.length > 1) onChange(bullets.filter((_, j) => j !== i));
+          }}
+          onRemove={() => onChange(bullets.filter((_, j) => j !== i))}
+        />
       ))}
       <button
         type="button"
@@ -224,22 +259,24 @@ function EntryListEditor({
       {entries.map((e, i) => (
         <div key={i} className="rounded-md border border-border bg-card/40 p-3 space-y-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Field label="TITLE" value={e.title} rich onChange={(v) => update(i, { title: v })} />
-            <Field label="SUBTITLE" value={e.subtitle ?? ""} rich onChange={(v) => update(i, { subtitle: v })} />
+            <Field label="TITLE" value={e.title} onChange={(v) => update(i, { title: v })} />
+            <Field label="SUBTITLE" value={e.subtitle ?? ""} onChange={(v) => update(i, { subtitle: v })} />
+            <Field label="LOCATION" value={e.location ?? ""} onChange={(v) => update(i, { location: v })} format={false} />
+            <Field label="DATES" value={e.dates ?? ""} onChange={(v) => update(i, { dates: v })} format={false} />
             <Field
-              label="LINK NAME (jo dikhega)"
+              label="LINK NAME (shown on resume)"
               value={e.linkLabel ?? ""}
-              placeholder="e.g. LINK / GitHub / Certificate"
+              placeholder="Live Demo"
               onChange={(v) => update(i, { linkLabel: v })}
+              format={false}
             />
             <Field
-              label="LINK URL (paste karo)"
+              label="LINK URL (opens on click)"
               value={e.linkUrl ?? ""}
-              placeholder="https://..."
+              placeholder="https://github.com/..."
               onChange={(v) => update(i, { linkUrl: v })}
+              format={false}
             />
-            <Field label="LOCATION" value={e.location ?? ""} onChange={(v) => update(i, { location: v })} />
-            <Field label="DATES" value={e.dates ?? ""} onChange={(v) => update(i, { dates: v })} />
           </div>
           <BulletEditor bullets={e.bullets} onChange={(b) => update(i, { bullets: b })} />
           <button
@@ -270,23 +307,23 @@ export default function ResumeEditor({ data, onChange }: ResumeEditorProps) {
       <div>
         <h2 className="font-display font-semibold text-lg text-foreground">Edit Resume Content</h2>
         <p className="text-xs font-mono text-muted-foreground mt-1">
-          Word select karke <span className="text-primary">B</span> dabao = bold (Ctrl/Cmd + B bhi chalega) ·
-          text select karke <span className="text-primary">LINK</span> = clickable link (URL chhupa rehta hai)
+          Text select karke <span className="text-primary font-bold">B</span> = bold, LINK = clickable link
+          (resume me sirf naam dikhega, black · no underline)
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <Field label="NAME" value={data.name} onChange={(v) => set("name", v)} />
-        <Field label="HEADLINE" value={data.headline} rich onChange={(v) => set("headline", v)} />
+        <Field label="NAME" value={data.name} onChange={(v) => set("name", v)} format={false} />
+        <Field label="HEADLINE" value={data.headline} onChange={(v) => set("headline", v)} />
       </div>
 
       <CommaListField
-        label="CONTACT (comma separated)"
+        label="CONTACT (comma separated · [GitHub](https://...) se clickable)"
         values={data.contact}
         onChange={(values) => set("contact", values)}
       />
 
-      <RichArea label="SUMMARY" value={data.summary} onChange={(v) => set("summary", v)} />
+      <TextAreaField label="SUMMARY" value={data.summary} onChange={(v) => set("summary", v)} />
 
       <section className="space-y-3">
         <h3 className="font-display font-semibold text-foreground text-sm">Skills</h3>
@@ -295,6 +332,7 @@ export default function ResumeEditor({ data, onChange }: ResumeEditorProps) {
             <Field
               label="CATEGORY"
               value={g.category}
+              format={false}
               onChange={(v) => set("skills", data.skills.map((s, j) => (j === i ? { ...s, category: v } : s)))}
             />
             <CommaListField
@@ -345,16 +383,11 @@ export default function ResumeEditor({ data, onChange }: ResumeEditorProps) {
       <EntryListEditor title="Projects" entries={data.projects} onChange={(e) => set("projects", e)} />
       <EntryListEditor title="Education" entries={data.education} onChange={(e) => set("education", e)} />
 
-      <RichArea
-        label="CERTIFICATIONS / TRAINING (one per line — [Certificate](https://link) se clickable naam banega)"
+      <TextAreaField
+        label="CERTIFICATIONS (one per line · [Certificate](https://...) clickable)"
         value={data.certifications.join("\n")}
-        minH="80px"
-        onChange={(v) =>
-          set(
-            "certifications",
-            v.split("\n").map((s) => s.trim()).filter(Boolean),
-          )
-        }
+        minHeight={70}
+        onChange={(v) => set("certifications", v.split("\n").map((s) => s.trimStart()).filter((s) => s !== ""))}
       />
     </div>
   );

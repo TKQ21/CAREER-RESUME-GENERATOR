@@ -4,7 +4,7 @@ export interface ResumeEntry {
   location?: string;
   dates?: string;
   bullets: string[];
-  /** Optional clickable link shown in place of / next to the subtitle */
+  /** Optional clickable link: only the label is shown, click opens linkUrl */
   linkLabel?: string;
   linkUrl?: string;
 }
@@ -29,7 +29,6 @@ export interface ResumeData {
   education: ResumeEntry[];
   certifications: string[];
 }
-
 
 export type TemplateId = "classic" | "modern" | "compact";
 
@@ -69,8 +68,6 @@ export const SECTION_LABELS: { key: SectionKey; label: string }[] = [
   { key: "certifications", label: "Certifications" },
 ];
 
-export type SectionTitles = Partial<Record<SectionKey, string>>;
-
 export interface ResumeStyle {
   font: FontFamilyId;
   /** text size multiplier */
@@ -87,6 +84,17 @@ export interface ResumeStyle {
   titles: SectionTitles;
 }
 
+export type SectionTitles = Partial<Record<SectionKey, string>>;
+
+export function defaultSectionTitle(key: SectionKey) {
+  return SECTION_LABELS.find((s) => s.key === key)?.label ?? key;
+}
+
+export function sectionTitle(titles: SectionTitles | undefined, key: SectionKey) {
+  const custom = titles?.[key]?.trim();
+  return custom || defaultSectionTitle(key);
+}
+
 export const DEFAULT_STYLE: ResumeStyle = {
   font: "inter",
   size: 1,
@@ -97,12 +105,6 @@ export const DEFAULT_STYLE: ResumeStyle = {
   hidden: [],
   titles: {},
 };
-
-export const defaultSectionTitle = (key: SectionKey) =>
-  SECTION_LABELS.find((s) => s.key === key)?.label ?? key;
-
-export const sectionTitle = (titles: SectionTitles | undefined, key: SectionKey) =>
-  titles?.[key]?.trim() || defaultSectionTitle(key);
 
 export function applyStyleToData(data: ResumeData, hidden: SectionKey[]): ResumeData {
   const off = (k: SectionKey) => hidden.includes(k);

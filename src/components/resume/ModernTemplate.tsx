@@ -19,12 +19,13 @@ function Entry({ entry }: { entry: ResumeEntry }) {
       <p className="text-[12px] font-bold"><RichText text={entry.title} /></p>
       <p className="text-[10.5px] text-ink/70">
         {[entry.subtitle, entry.location, entry.dates].filter(Boolean).join(" · ")}
+        {entry.linkUrl && (
+          <>
+            {[entry.subtitle, entry.location, entry.dates].filter(Boolean).length > 0 && " · "}
+            <PlainLink href={entry.linkUrl}>{entry.linkLabel?.trim() || "Link"}</PlainLink>
+          </>
+        )}
       </p>
-      {entry.linkUrl && (
-        <p className="text-[10.5px] text-ink/70">
-          <PlainLink href={entry.linkUrl}>{entry.linkLabel?.trim() || "Link"}</PlainLink>
-        </p>
-      )}
       <ul className="mt-1 space-y-[3px]">
         {entry.bullets.map((b, i) => (
           <li key={i} className="text-[11px] leading-[1.45] pl-3 relative">
@@ -37,15 +38,7 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   );
 }
 
-export default function ModernTemplate({
-  data,
-  titles,
-}: {
-  data: ResumeData;
-  titles?: SectionTitles;
-}) {
-  const t = (k: Parameters<typeof sectionTitle>[1]) => sectionTitle(titles, k);
-
+export default function ModernTemplate({ data, titles }: { data: ResumeData; titles?: SectionTitles }) {
   return (
     <div className="resume-page bg-paper text-ink px-9 py-8">
       <header className="border-b-4 border-ink pb-3 mb-4">
@@ -70,7 +63,7 @@ export default function ModernTemplate({
 
           {data.skills.length > 0 && (
             <div className="mb-4">
-              <Rail>{t("skills")}</Rail>
+              <Rail>{sectionTitle(titles, "skills")}</Rail>
               <div className="space-y-2">
                 {data.skills.map((g, i) => (
                   <div key={i} className="resume-block">
@@ -85,7 +78,9 @@ export default function ModernTemplate({
                       </ul>
                     ) : (
                       <p className="mt-[2px] text-[10px] leading-[1.4] text-ink/80">
-                        <RichText text={g.items.join(", ")} />
+                        {g.items.map((item, j) => (
+                        <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
+                      ))}
                       </p>
                     )}
                   </div>
@@ -96,18 +91,13 @@ export default function ModernTemplate({
 
           {data.education.length > 0 && (
             <div className="mb-4">
-              <Rail>{t("education")}</Rail>
+              <Rail>{sectionTitle(titles, "education")}</Rail>
               {data.education.map((e, i) => (
                 <div key={i} className="resume-block mb-2">
                   <p className="text-[10.5px] font-bold"><RichText text={e.title} /></p>
                   <p className="text-[10px] text-ink/70">
                     {[e.subtitle, e.dates].filter(Boolean).join(" · ")}
                   </p>
-                  {e.linkUrl && (
-                    <p className="text-[10px] text-ink/70">
-                      <PlainLink href={e.linkUrl}>{e.linkLabel?.trim() || "Link"}</PlainLink>
-                    </p>
-                  )}
                   {e.bullets.map((b, j) => (
                     <p key={j} className="text-[10px] text-ink/80 leading-snug">
                       <RichText text={b} />
@@ -120,7 +110,7 @@ export default function ModernTemplate({
 
           {data.certifications.length > 0 && (
             <div>
-              <Rail>{t("certifications")}</Rail>
+              <Rail>{sectionTitle(titles, "certifications")}</Rail>
               <ul className="space-y-1">
                 {data.certifications.map((c, i) => (
                   <li key={i} className="text-[10px] leading-snug">
@@ -135,14 +125,14 @@ export default function ModernTemplate({
         <main className="flex-1 min-w-0">
           {data.summary && (
             <section>
-              <MainTitle>{t("summary")}</MainTitle>
+              <MainTitle>{sectionTitle(titles, "summary")}</MainTitle>
               <p className="text-[11px] leading-[1.5]"><RichText text={data.summary} /></p>
             </section>
           )}
 
           {data.experience.length > 0 && (
             <section>
-              <MainTitle>{t("experience")}</MainTitle>
+              <MainTitle>{sectionTitle(titles, "experience")}</MainTitle>
               {data.experience.map((e, i) => (
                 <Entry key={i} entry={e} />
               ))}
@@ -151,7 +141,7 @@ export default function ModernTemplate({
 
           {data.projects.length > 0 && (
             <section>
-              <MainTitle>{t("projects")}</MainTitle>
+              <MainTitle>{sectionTitle(titles, "projects")}</MainTitle>
               {data.projects.map((e, i) => (
                 <Entry key={i} entry={e} />
               ))}
