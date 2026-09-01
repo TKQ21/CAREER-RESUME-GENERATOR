@@ -161,6 +161,24 @@ export default function ResumeStyleControls({ style, onChange, onReset }: Props)
           })}
         </div>
       </div>
+
+      <div>
+        <span className="block text-[10px] font-mono text-muted-foreground mb-2">
+          SECTION NAMES (rename headings)
+        </span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {SECTION_LABELS.map(({ key, label }) => (
+            <input
+              key={key}
+              value={style.titles?.[key] ?? ""}
+              placeholder={label}
+              onChange={(e) => set("titles", { ...style.titles, [key]: e.target.value })}
+              className="w-full bg-card border border-border rounded-md px-2 py-1.5 text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
+
