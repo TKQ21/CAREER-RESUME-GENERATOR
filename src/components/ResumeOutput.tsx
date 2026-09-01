@@ -45,7 +45,6 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
         "--resume-margin-y": `${style.marginY}px`,
         "--resume-line": String(style.lineHeight),
         "--resume-section-gap": `${style.sectionGap}px`,
-        "--resume-heading-weight": style.boldHeadings ? "700" : "500",
       }) as React.CSSProperties,
     [style],
   );
@@ -209,7 +208,7 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
         >
           <div ref={pageRef} className="resume-sheet shadow-2xl" style={styleVars}>
             <div ref={contentRef}>
-              <Template data={visibleData} />
+              <Template data={visibleData} titles={style.titles} />
             </div>
           </div>
 
