@@ -1,4 +1,12 @@
-import { FONT_FAMILIES, ResumeStyle, SECTION_LABELS, SectionKey } from "./resume/types";
+import {
+  FONT_FAMILIES,
+  ResumeStyle,
+  SECTION_LABELS,
+  SectionKey,
+  defaultSectionTitle,
+  normalizeOrder,
+} from "./resume/types";
+
 
 interface Props {
   style: ResumeStyle;
