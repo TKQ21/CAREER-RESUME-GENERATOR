@@ -6,6 +6,8 @@ import {
   defaultSectionTitle,
   normalizeOrder,
 } from "./resume/types";
+import { move } from "@/lib/reorder";
+
 
 
 interface Props {
