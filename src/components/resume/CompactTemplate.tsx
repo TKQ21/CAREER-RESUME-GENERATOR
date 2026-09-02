@@ -1,4 +1,4 @@
-import { ResumeData, ResumeEntry, SectionTitles, sectionTitle } from "./types";
+import { ResumeData, ResumeEntry, SectionKey, SectionTitles, normalizeOrder, sectionTitle } from "./types";
 import RichText, { PlainLink } from "./RichText";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,7 @@ function Entry({ entry }: { entry: ResumeEntry }) {
     <div className="resume-block mb-2">
       <p className="text-[11.5px]">
         <span className="font-bold"><RichText text={entry.title} /></span>
-        {entry.subtitle && <span className="text-ink/75"> — <RichText text={entry.subtitle} /></span>}
+        {entry.subtitle && <span className="text-ink/75"> | <RichText text={entry.subtitle} /></span>}
         {entry.linkUrl && (
           <span className="text-ink/75">
             {" · "}
@@ -40,7 +40,89 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   );
 }
 
-export default function CompactTemplate({ data, titles }: { data: ResumeData; titles?: SectionTitles }) {
+export default function CompactTemplate({
+  data,
+  titles,
+  order,
+}: {
+  data: ResumeData;
+  titles?: SectionTitles;
+  order?: SectionKey[];
+}) {
+  const sections: Record<SectionKey, React.ReactNode> = {
+    summary: data.summary ? (
+      <section key="summary">
+        <SectionTitle>{sectionTitle(titles, "summary")}</SectionTitle>
+        <p className="text-[10.5px] leading-[1.45] text-justify"><RichText text={data.summary} /></p>
+      </section>
+    ) : null,
+    skills: data.skills.length > 0 ? (
+      <section key="skills">
+        <SectionTitle>{sectionTitle(titles, "skills")}</SectionTitle>
+        {data.skills.map((g, i) => (
+          <div key={i} className="resume-block text-[10.5px] leading-[1.4] mb-1">
+            {g.layout === "bullets" ? (
+              <>
+                <p className="font-bold">{g.category}</p>
+                <ul className="space-y-[1px]">
+                  {g.items.map((item, j) => (
+                    <li key={j} className="pl-3 relative">
+                      <span className="absolute left-0">▪</span><RichText text={item} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p>
+                <span className="font-bold">{g.category}: </span>
+                {g.items.map((item, j) => (
+                  <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
+                ))}
+              </p>
+            )}
+          </div>
+        ))}
+      </section>
+    ) : null,
+    experience: data.experience.length > 0 ? (
+      <section key="experience">
+        <SectionTitle>{sectionTitle(titles, "experience")}</SectionTitle>
+        {data.experience.map((e, i) => (
+          <Entry key={i} entry={e} />
+        ))}
+      </section>
+    ) : null,
+    projects: data.projects.length > 0 ? (
+      <section key="projects">
+        <SectionTitle>{sectionTitle(titles, "projects")}</SectionTitle>
+        {data.projects.map((e, i) => (
+          <Entry key={i} entry={e} />
+        ))}
+      </section>
+    ) : null,
+    education: data.education.length > 0 ? (
+      <section key="education">
+        <SectionTitle>{sectionTitle(titles, "education")}</SectionTitle>
+        {data.education.map((e, i) => (
+          <Entry key={i} entry={e} />
+        ))}
+      </section>
+    ) : null,
+    certifications: data.certifications.length > 0 ? (
+      <section key="certifications">
+        <SectionTitle>{sectionTitle(titles, "certifications")}</SectionTitle>
+        <ul className="space-y-[1px]">
+          {data.certifications.map((c, i) => (
+            <li key={i} className="text-[10.5px] leading-[1.4] pl-3 relative">
+              <span className="absolute left-0">▪</span>
+              <RichText text={c} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null,
+  };
+
   return (
     <div className="resume-page bg-paper text-ink px-9 py-7">
       <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink/60 pb-2">
@@ -62,82 +144,7 @@ export default function CompactTemplate({ data, titles }: { data: ResumeData; ti
         )}
       </header>
 
-      {data.summary && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "summary")}</SectionTitle>
-          <p className="text-[10.5px] leading-[1.45] text-justify"><RichText text={data.summary} /></p>
-        </section>
-      )}
-
-      {data.skills.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "skills")}</SectionTitle>
-          {data.skills.map((g, i) => (
-            <div key={i} className="resume-block text-[10.5px] leading-[1.4] mb-1">
-              {g.layout === "bullets" ? (
-                <>
-                  <p className="font-bold">{g.category}</p>
-                  <ul className="space-y-[1px]">
-                    {g.items.map((item, j) => (
-                      <li key={j} className="pl-3 relative">
-                        <span className="absolute left-0">▪</span><RichText text={item} />
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <p>
-                  <span className="font-bold">{g.category}: </span>
-                  {g.items.map((item, j) => (
-                    <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
-                  ))}
-                </p>
-              )}
-            </div>
-          ))}
-        </section>
-      )}
-
-      {data.experience.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "experience")}</SectionTitle>
-          {data.experience.map((e, i) => (
-            <Entry key={i} entry={e} />
-          ))}
-        </section>
-      )}
-
-      {data.projects.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "projects")}</SectionTitle>
-          {data.projects.map((e, i) => (
-            <Entry key={i} entry={e} />
-          ))}
-        </section>
-      )}
-
-      {data.education.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "education")}</SectionTitle>
-          {data.education.map((e, i) => (
-            <Entry key={i} entry={e} />
-          ))}
-        </section>
-      )}
-
-      {data.certifications.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "certifications")}</SectionTitle>
-          <ul className="space-y-[1px]">
-            {data.certifications.map((c, i) => (
-              <li key={i} className="text-[10.5px] leading-[1.4] pl-3 relative">
-                <span className="absolute left-0">▪</span>
-                <RichText text={c} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {normalizeOrder(order).map((k) => sections[k])}
     </div>
   );
 }
