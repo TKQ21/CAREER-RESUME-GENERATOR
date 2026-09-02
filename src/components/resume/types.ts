@@ -82,6 +82,8 @@ export interface ResumeStyle {
   hidden: SectionKey[];
   /** user-renamed section headings */
   titles: SectionTitles;
+  /** order in which sections appear */
+  order: SectionKey[];
 }
 
 export type SectionTitles = Partial<Record<SectionKey, string>>;
@@ -95,6 +97,13 @@ export function sectionTitle(titles: SectionTitles | undefined, key: SectionKey)
   return custom || defaultSectionTitle(key);
 }
 
+export const ALL_SECTIONS: SectionKey[] = SECTION_LABELS.map((s) => s.key);
+
+export function normalizeOrder(order?: SectionKey[]): SectionKey[] {
+  const given = (order ?? []).filter((k) => ALL_SECTIONS.includes(k));
+  return [...given, ...ALL_SECTIONS.filter((k) => !given.includes(k))];
+}
+
 export const DEFAULT_STYLE: ResumeStyle = {
   font: "inter",
   size: 1,
@@ -104,7 +113,9 @@ export const DEFAULT_STYLE: ResumeStyle = {
   sectionGap: 12,
   hidden: [],
   titles: {},
+  order: ALL_SECTIONS,
 };
+
 
 export function applyStyleToData(data: ResumeData, hidden: SectionKey[]): ResumeData {
   const off = (k: SectionKey) => hidden.includes(k);

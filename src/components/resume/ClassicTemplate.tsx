@@ -1,4 +1,4 @@
-import { ResumeData, ResumeEntry, SectionTitles, sectionTitle } from "./types";
+import { ResumeData, ResumeEntry, SectionKey, SectionTitles, normalizeOrder, sectionTitle } from "./types";
 import RichText, { PlainLink } from "./RichText";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -9,9 +9,9 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Entry({ entry }: { entry: ResumeEntry }) {
+function Entry({ entry, inlineSubtitle = false }: { entry: ResumeEntry; inlineSubtitle?: boolean }) {
   const subtitleParts: React.ReactNode[] = [];
-  if (entry.subtitle) subtitleParts.push(<RichText key="s" text={entry.subtitle} />);
+  if (!inlineSubtitle && entry.subtitle) subtitleParts.push(<RichText key="s" text={entry.subtitle} />);
   if (entry.linkUrl)
     subtitleParts.push(
       <PlainLink key="l" href={entry.linkUrl}>
@@ -22,7 +22,12 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   return (
     <div className="resume-block mb-3">
       <div className="flex items-baseline justify-between gap-4">
-        <p className="text-[12.5px] font-bold"><RichText text={entry.title} /></p>
+        <p className="text-[12.5px] font-bold">
+          <RichText text={entry.title} />
+          {inlineSubtitle && entry.subtitle && (
+            <span className="font-normal"> | <RichText text={entry.subtitle} /></span>
+          )}
+        </p>
         <p className="text-[10.5px] text-ink/70 whitespace-nowrap">
           {[entry.location, entry.dates].filter(Boolean).join(" | ")}
         </p>
@@ -49,7 +54,92 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   );
 }
 
-export default function ClassicTemplate({ data, titles }: { data: ResumeData; titles?: SectionTitles }) {
+
+export default function ClassicTemplate({
+  data,
+  titles,
+  order,
+}: {
+  data: ResumeData;
+  titles?: SectionTitles;
+  order?: SectionKey[];
+}) {
+  const sections: Record<SectionKey, React.ReactNode> = {
+    summary: data.summary ? (
+      <section key="summary">
+        <SectionTitle>{sectionTitle(titles, "summary")}</SectionTitle>
+        <p className="text-[11px] leading-[1.5] text-justify"><RichText text={data.summary} /></p>
+      </section>
+    ) : null,
+    skills: data.skills.length > 0 ? (
+      <section key="skills">
+        <SectionTitle>{sectionTitle(titles, "skills")}</SectionTitle>
+        <div className="space-y-2">
+          {data.skills.map((g, i) => (
+            <div key={i} className="resume-block text-[11px] leading-[1.45]">
+              {g.layout === "bullets" ? (
+                <>
+                  <p className="font-bold">{g.category}</p>
+                  <ul className="space-y-[2px]">
+                    {g.items.map((item, j) => (
+                      <li key={j} className="pl-3 relative">
+                        <span className="absolute left-0">•</span><RichText text={item} />
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <p>
+                  <span className="font-bold">{g.category}: </span>
+                  {g.items.map((item, j) => (
+                    <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
+                  ))}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    ) : null,
+    experience: data.experience.length > 0 ? (
+      <section key="experience">
+        <SectionTitle>{sectionTitle(titles, "experience")}</SectionTitle>
+        {data.experience.map((e, i) => (
+          <Entry key={i} entry={e} />
+        ))}
+      </section>
+    ) : null,
+    projects: data.projects.length > 0 ? (
+      <section key="projects">
+        <SectionTitle>{sectionTitle(titles, "projects")}</SectionTitle>
+        {data.projects.map((e, i) => (
+          <Entry key={i} entry={e} inlineSubtitle />
+        ))}
+      </section>
+    ) : null,
+    education: data.education.length > 0 ? (
+      <section key="education">
+        <SectionTitle>{sectionTitle(titles, "education")}</SectionTitle>
+        {data.education.map((e, i) => (
+          <Entry key={i} entry={e} />
+        ))}
+      </section>
+    ) : null,
+    certifications: data.certifications.length > 0 ? (
+      <section key="certifications">
+        <SectionTitle>{sectionTitle(titles, "certifications")}</SectionTitle>
+        <ul className="space-y-[3px]">
+          {data.certifications.map((c, i) => (
+            <li key={i} className="text-[11px] pl-3 relative">
+              <span className="absolute left-0">•</span>
+              <RichText text={c} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null,
+  };
+
   return (
     <div className="resume-page bg-paper text-ink px-10 py-8">
       <header className="text-center">
@@ -67,84 +157,8 @@ export default function ClassicTemplate({ data, titles }: { data: ResumeData; ti
         )}
       </header>
 
-      {data.summary && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "summary")}</SectionTitle>
-          <p className="text-[11px] leading-[1.5] text-justify"><RichText text={data.summary} /></p>
-        </section>
-      )}
-
-      {data.skills.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "skills")}</SectionTitle>
-          <div className="space-y-2">
-            {data.skills.map((g, i) => (
-              <div key={i} className="resume-block text-[11px] leading-[1.45]">
-                {g.layout === "bullets" ? (
-                  <>
-                    <p className="font-bold">{g.category}</p>
-                    <ul className="space-y-[2px]">
-                      {g.items.map((item, j) => (
-                        <li key={j} className="pl-3 relative">
-                          <span className="absolute left-0">•</span><RichText text={item} />
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : (
-                  <p>
-                    <span className="font-bold">{g.category}: </span>
-                    {g.items.map((item, j) => (
-                        <span key={j}>{j > 0 && ", "}<RichText text={item} /></span>
-                      ))}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {data.experience.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "experience")}</SectionTitle>
-          {data.experience.map((e, i) => (
-            <Entry key={i} entry={e} />
-          ))}
-        </section>
-      )}
-
-      {data.projects.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "projects")}</SectionTitle>
-          {data.projects.map((e, i) => (
-            <Entry key={i} entry={e} />
-          ))}
-        </section>
-      )}
-
-      {data.education.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "education")}</SectionTitle>
-          {data.education.map((e, i) => (
-            <Entry key={i} entry={e} />
-          ))}
-        </section>
-      )}
-
-      {data.certifications.length > 0 && (
-        <section>
-          <SectionTitle>{sectionTitle(titles, "certifications")}</SectionTitle>
-          <ul className="space-y-[3px]">
-            {data.certifications.map((c, i) => (
-              <li key={i} className="text-[11px] pl-3 relative">
-                <span className="absolute left-0">•</span>
-                <RichText text={c} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {normalizeOrder(order).map((k) => sections[k])}
     </div>
   );
 }
+

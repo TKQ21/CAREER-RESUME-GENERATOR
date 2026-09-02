@@ -57,7 +57,7 @@ export default function InputBox({ onGenerate, isLoading, initialText = "" }: In
         </label>
         <textarea
           className="w-full h-56 bg-card neon-border rounded-md p-4 text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none transition-all"
-          placeholder="Naam, contact, education, internships, projects, skills — jitna likhna hai likho. Jaise: 'Mohd Kaif, Delhi, +9198... , maine React me AI chatbot banaya...'"
+          placeholder="Naam, contact, education, internships, projects, skills — jitna likhna hai likho. Jaise: 'Ananya Verma, Pune, +91 98200 45678, ananya.verma@example.com, maine Python me sales dashboard banaya...'"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
