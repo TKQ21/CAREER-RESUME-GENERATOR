@@ -186,7 +186,46 @@ export default function ResumeStyleControls({ style, onChange, onReset }: Props)
           ))}
         </div>
       </div>
+
+      <div>
+        <span className="block text-[10px] font-mono text-muted-foreground mb-2">
+          SECTION ORDER (↑ / ↓ se aage-peeche karo)
+        </span>
+        <div className="space-y-1">
+          {normalizeOrder(style.order).map((key, i, arr) => (
+            <div
+              key={key}
+              className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-1.5"
+            >
+              <span className="text-xs font-mono text-foreground">
+                {i + 1}. {style.titles?.[key]?.trim() || defaultSectionTitle(key)}
+              </span>
+              <span className="flex gap-1">
+                <button
+                  type="button"
+                  disabled={i === 0}
+                  onClick={() => set("order", move(arr, i, i - 1))}
+                  className="px-2 rounded border border-border text-[11px] font-mono text-muted-foreground hover:text-primary disabled:opacity-30"
+                  aria-label="Move up"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  disabled={i === arr.length - 1}
+                  onClick={() => set("order", move(arr, i, i + 1))}
+                  className="px-2 rounded border border-border text-[11px] font-mono text-muted-foreground hover:text-primary disabled:opacity-30"
+                  aria-label="Move down"
+                >
+                  ↓
+                </button>
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
+
   );
 }
 
