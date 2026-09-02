@@ -1,4 +1,4 @@
-import { ResumeData, ResumeEntry, SectionTitles, sectionTitle } from "./types";
+import { ResumeData, ResumeEntry, SectionKey, SectionTitles, normalizeOrder, sectionTitle } from "./types";
 import RichText, { PlainLink } from "./RichText";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -9,9 +9,9 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Entry({ entry }: { entry: ResumeEntry }) {
+function Entry({ entry, inlineSubtitle = false }: { entry: ResumeEntry; inlineSubtitle?: boolean }) {
   const subtitleParts: React.ReactNode[] = [];
-  if (entry.subtitle) subtitleParts.push(<RichText key="s" text={entry.subtitle} />);
+  if (!inlineSubtitle && entry.subtitle) subtitleParts.push(<RichText key="s" text={entry.subtitle} />);
   if (entry.linkUrl)
     subtitleParts.push(
       <PlainLink key="l" href={entry.linkUrl}>
@@ -22,7 +22,12 @@ function Entry({ entry }: { entry: ResumeEntry }) {
   return (
     <div className="resume-block mb-3">
       <div className="flex items-baseline justify-between gap-4">
-        <p className="text-[12.5px] font-bold"><RichText text={entry.title} /></p>
+        <p className="text-[12.5px] font-bold">
+          <RichText text={entry.title} />
+          {inlineSubtitle && entry.subtitle && (
+            <span className="font-normal"> | <RichText text={entry.subtitle} /></span>
+          )}
+        </p>
         <p className="text-[10.5px] text-ink/70 whitespace-nowrap">
           {[entry.location, entry.dates].filter(Boolean).join(" | ")}
         </p>
@@ -48,6 +53,7 @@ function Entry({ entry }: { entry: ResumeEntry }) {
     </div>
   );
 }
+
 
 export default function ClassicTemplate({ data, titles }: { data: ResumeData; titles?: SectionTitles }) {
   return (
