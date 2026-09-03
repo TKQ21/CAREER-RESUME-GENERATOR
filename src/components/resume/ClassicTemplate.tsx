@@ -143,7 +143,7 @@ export default function ClassicTemplate({
   return (
     <div className="resume-page bg-paper text-ink px-10 py-8">
       <header className="text-center">
-        <h1 className="text-[26px] font-bold tracking-[2px] uppercase">{data.name || "YOUR NAME"}</h1>
+        <h1 className="text-[26px] font-bold tracking-normal uppercase">{data.name || "YOUR NAME"}</h1>
         {data.headline && <p className="text-[12.5px] font-semibold mt-1">{data.headline}</p>}
         {data.contact.length > 0 && (
           <p className="text-[10.5px] text-ink/75 mt-1 leading-relaxed">
