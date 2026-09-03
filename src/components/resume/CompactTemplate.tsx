@@ -127,7 +127,7 @@ export default function CompactTemplate({
     <div className="resume-page bg-paper text-ink px-9 py-7">
       <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink/60 pb-2">
         <div>
-          <h1 className="text-[22px] font-bold uppercase tracking-[1px] leading-none">
+          <h1 className="text-[22px] font-bold uppercase leading-none">
             {data.name || "YOUR NAME"}
           </h1>
           {data.headline && <p className="text-[11px] text-ink/75 mt-[3px]">{data.headline}</p>}
