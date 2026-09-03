@@ -68,7 +68,9 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
   // @page lives outside the resume element, so expose the chosen vertical margin at document level.
   useEffect(() => {
     document.documentElement.style.setProperty("--print-margin-y", `${style.marginY}px`);
-    return () => document.documentElement.style.removeProperty("--print-margin-y");
+    return () => {
+      document.documentElement.style.removeProperty("--print-margin-y");
+    };
   }, [style.marginY]);
 
   // Fit content into the requested page count (or the fewest possible pages)
