@@ -17,14 +17,14 @@ export type { ResumeData } from "./resume/types";
 
 const A4_WIDTH = 794; // px @96dpi
 const A4_HEIGHT = 1123;
-const FIT_HEIGHT = 1040; // usable height, leaves print-rounding slack
+const PRINT_ROUNDING_SLACK = 3;
 
 interface ResumeOutputProps {
   data: ResumeData;
 }
 
 type PageTarget = "auto" | 1 | 2 | 3;
-const CANDIDATES = [1.06, 1.03, 1, 0.97, 0.94, 0.91, 0.88, 0.85, 0.82, 0.79, 0.76, 0.73, 0.7];
+const CANDIDATES = Array.from({ length: 29 }, (_, i) => Number((1.25 - i * 0.02).toFixed(2)));
 
 export default function ResumeOutput({ data }: ResumeOutputProps) {
   const [template, setTemplate] = useState<TemplateId>("classic");
@@ -65,6 +65,14 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  // @page lives outside the resume element, so expose the chosen vertical margin at document level.
+  useEffect(() => {
+    document.documentElement.style.setProperty("--print-margin-y", `${style.marginY}px`);
+    return () => {
+      document.documentElement.style.removeProperty("--print-margin-y");
+    };
+  }, [style.marginY]);
+
   // Fit content into the requested page count (or the fewest possible pages)
   useEffect(() => {
     let cancelled = false;
@@ -72,7 +80,11 @@ export default function ResumeOutput({ data }: ResumeOutputProps) {
     const measurePages = (el: HTMLElement, content: HTMLElement, s: number) => {
       el.style.setProperty("--resume-scale", String(s));
       void content.offsetHeight; // force reflow
-      return Math.max(1, Math.ceil(content.getBoundingClientRect().height / FIT_HEIGHT));
+      const renderedHeight = content.getBoundingClientRect().height;
+      const zoom = s * style.size;
+      const bodyHeight = Math.max(0, renderedHeight - 2 * style.marginY * zoom);
+      const usablePageHeight = A4_HEIGHT - 2 * style.marginY - PRINT_ROUNDING_SLACK;
+      return Math.max(1, Math.ceil(bodyHeight / usablePageHeight));
     };
 
     const run = async () => {

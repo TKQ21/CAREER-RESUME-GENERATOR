@@ -149,7 +149,12 @@
   }
 }
 
-.resume-block,
+.resume-block > p:first-child {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.resume-block li,
 .resume-footer {
   break-inside: avoid;
   page-break-inside: avoid;
@@ -162,7 +167,7 @@
 
 @page {
   size: A4;
-  margin: 0;
+  margin: var(--print-margin-y, 32px) 0;
 }
 
 @media print {
@@ -190,6 +195,10 @@
   }
   .resume-sheet {
     box-shadow: none !important;
+  }
+  .resume-sheet .resume-page {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
   .no-print,
   .scanline {
