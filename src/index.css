@@ -149,7 +149,12 @@
   }
 }
 
-.resume-block,
+.resume-block > p:first-child {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.resume-block li,
 .resume-footer {
   break-inside: avoid;
   page-break-inside: avoid;
