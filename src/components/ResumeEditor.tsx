@@ -279,18 +279,28 @@ export function splitBullets(raw: string): string[] {
 
 function BulkBullets({ bullets, onChange }: { bullets: string[]; onChange: (b: string[]) => void }) {
   const [draft, setDraft] = useState(bullets.join("\n"));
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const updateDraft = (value: string) => {
+    setDraft(value);
+    onChange(splitBullets(value));
+  };
   return (
     <label className="block">
-      <span className="block text-[10px] font-mono text-muted-foreground mb-1">
-        PASTE ALL POINTS TOGETHER — har nayi line ya • ek bullet ban jayegi
+      <span className="flex items-center justify-between text-[10px] font-mono text-muted-foreground mb-1">
+        <span>PASTE ALL POINTS TOGETHER — har nayi line ya • ek bullet ban jayegi</span>
+        <FormatToolbar elRef={ref as React.RefObject<TextEl>} value={draft} onChange={updateDraft} />
       </span>
       <textarea
+        ref={ref}
         className={`${inputCls} resize-y min-h-[120px]`}
         value={draft}
         placeholder={"Built X using Y\nImproved Z by 30%\nLed a team of 4"}
-        onChange={(e) => {
-          setDraft(e.target.value);
-          onChange(splitBullets(e.target.value));
+        onChange={(e) => updateDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+            e.preventDefault();
+            wrapSelection(e.currentTarget, draft, "bold", updateDraft);
+          }
         }}
       />
     </label>
@@ -326,7 +336,8 @@ function BulletEditor({ bullets, onChange }: { bullets: string[]; onChange: (b: 
               onDown={() => onChange(move(bullets, i, i + 1))}
               onChange={(v) => {
                 const next = [...bullets];
-                next[i] = v;
+                const pastedLines = v.includes("\n") ? splitBullets(v) : [v];
+                next.splice(i, 1, ...pastedLines);
                 onChange(next);
               }}
               onEnter={() => {
