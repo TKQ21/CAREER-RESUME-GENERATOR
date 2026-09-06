@@ -32,7 +32,24 @@ function hoistEntryLink(entry: ResumeEntry): ResumeEntry {
   return entry;
 }
 
-export function hoistResumeLinks(data: ResumeData): ResumeData {
+const DEGREE = /\b(b\.?tech|m\.?tech|b\.?e\.?|m\.?e\.?|bca|mca|b\.?sc|m\.?sc|b\.?com|m\.?com|bba|mba|ba\b|ma\b|phd|diploma|bachelor|master|intermediate|high school|senior secondary|10th|12th|hsc|ssc|university|college|cgpa|percentage)\b/i;
+
+/** AI sometimes drops degrees into certifications — put them back in education. */
+function restoreEducation(data: ResumeData): ResumeData {
+  const misplaced = (data.certifications ?? []).filter((c) => DEGREE.test(c));
+  if (misplaced.length === 0) return data;
+  return {
+    ...data,
+    certifications: (data.certifications ?? []).filter((c) => !DEGREE.test(c)),
+    education: [
+      ...(data.education ?? []),
+      ...misplaced.map((c) => ({ title: c, bullets: [] as string[] })),
+    ],
+  };
+}
+
+export function hoistResumeLinks(input: ResumeData): ResumeData {
+  const data = restoreEducation(input);
   return {
     ...data,
     experience: (data.experience ?? []).map(hoistEntryLink),
