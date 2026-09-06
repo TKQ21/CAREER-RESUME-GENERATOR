@@ -11,6 +11,8 @@ interface Entry {
   location?: string;
   dates?: string;
   bullets?: unknown;
+  linkLabel?: string;
+  linkUrl?: string;
 }
 
 function normalizeEntries(raw: unknown) {
@@ -22,6 +24,8 @@ function normalizeEntries(raw: unknown) {
       location: e?.location ? String(e.location).trim() : undefined,
       dates: e?.dates ? String(e.dates).trim() : undefined,
       bullets: Array.isArray(e?.bullets) ? e.bullets.map((b) => String(b).trim()).filter(Boolean) : [],
+      linkLabel: e?.linkLabel ? String(e.linkLabel).trim() : undefined,
+      linkUrl: e?.linkUrl ? String(e.linkUrl).trim() : undefined,
     }))
     .filter((e) => e.title || e.bullets.length > 0);
 }
@@ -56,10 +60,12 @@ STRICT RULES:
 4. Content must be honest, ATS-friendly and role-relevant, in a confident HR-ready tone.
 5. Use every meaningful detail the user provided — do not drop experience or projects. A longer input should produce a longer resume (2-3 pages is fine).
 6. Do NOT include LinkedIn-summary or interview-prep style sections.
+7. FORMATTING MARKERS: the input may contain **bold** markers and [Label](url) links. Keep every one of them exactly where it belongs in the output text so already-highlighted keywords stay bold and links stay clickable. Never strip them, never invent new ones.
 
 ${roleLine}
 
-${isImport ? `IMPORT MODE: The input is the raw text of an EXISTING resume the user uploaded. Preserve their real content, wording, section structure, bullet points, job titles, dates and skill groupings as faithfully as possible. Only fix grammar, translate any Hindi/Hinglish parts into English, and keep every bullet as its own bullet. Do NOT rewrite from scratch, do NOT drop sections, do NOT add anything that is not in the file.` : ""}
+${isImport ? `IMPORT MODE: The input is the raw text of an EXISTING resume the user uploaded. Preserve their real content, wording, section structure, bullet points, job titles, dates and skill groupings as faithfully as possible. Only fix grammar, translate any Hindi/Hinglish parts into English, and keep every bullet as its own bullet. Do NOT rewrite from scratch, do NOT drop sections, do NOT add anything that is not in the file.
+IMPORT MODE LINKS & BOLD: every URL/hyperlink in the file must survive. If a job/project/certification title or heading has a hyperlink attached to it, put the readable label in "linkLabel" and the URL in "linkUrl" for that entry. Links that belong to personal details (email, phone, LinkedIn, GitHub, portfolio) go into "contact" as [Label](url). Links inside a bullet stay inline in that bullet as [Label](url). Any word that was **bold** in the file must remain wrapped in ** ** in the output.` : ""}
 
 Respond with ONLY a valid JSON object (no markdown, no commentary) shaped exactly like:
 {
@@ -68,10 +74,10 @@ Respond with ONLY a valid JSON object (no markdown, no commentary) shaped exactl
   "contact": ["phone", "email", "linkedin url", "github url", "portfolio url"],
   "summary": "3-4 line professional summary",
   "skills": [{ "category": "Programming/Frontend", "items": ["Python", "React.js"], "layout": "inline" }],
-  "experience": [{ "title": "Company — Role", "subtitle": "optional", "location": "City, Country", "dates": "MM/YYYY – MM/YYYY", "bullets": ["impact-focused bullet"] }],
-  "projects": [{ "title": "Project name — one-line descriptor", "location": "optional", "dates": "optional", "bullets": ["what was built, tech used, outcome"] }],
+  "experience": [{ "title": "Company — Role", "subtitle": "optional", "location": "City, Country", "dates": "MM/YYYY – MM/YYYY", "bullets": ["impact-focused bullet"], "linkLabel": "optional link text", "linkUrl": "optional https url" }],
+  "projects": [{ "title": "Project name — one-line descriptor", "location": "optional", "dates": "optional", "bullets": ["what was built, tech used, outcome"], "linkLabel": "optional link text", "linkUrl": "optional https url" }],
   "education": [{ "title": "Degree", "subtitle": "Institution", "dates": "years", "bullets": ["optional detail like CGPA if given"] }],
-  "certifications": ["certification name"]
+  "certifications": ["certification name, optionally as [Certification name](https://verify-url)"]
 }
 
 Rules for fields: omit array items you have no information for (return empty arrays). Group skills into 3-6 labelled categories. Each experience/project should have 3-6 bullets when the input supports it, each bullet one sentence starting with a strong action verb.
