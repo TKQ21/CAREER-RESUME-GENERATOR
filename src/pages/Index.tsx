@@ -4,6 +4,7 @@ import InputBox from "@/components/InputBox";
 import UploadBox from "@/components/UploadBox";
 import ResumeEditor from "@/components/ResumeEditor";
 import ResumeOutput, { ResumeData } from "@/components/ResumeOutput";
+import { hoistResumeLinks } from "@/lib/hoistLinks";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -38,7 +39,7 @@ export default function Index() {
       if (!res.ok) throw new Error("Failed to generate resume");
 
       const data = await res.json();
-      setResumeData(data);
+      setResumeData(hoistResumeLinks(data));
       toast.success(mode === "import" ? "Resume import ho gaya — ab edit karo!" : "Resume generated successfully!");
     } catch (err) {
       console.error(err);
