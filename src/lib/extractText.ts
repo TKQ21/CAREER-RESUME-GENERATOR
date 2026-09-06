@@ -3,11 +3,31 @@ import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
-function isBoldFont(styles: Record<string, { fontFamily?: string }>, fontName?: string) {
-  if (!fontName) return false;
-  const family = styles?.[fontName]?.fontFamily ?? "";
-  return /bold|black|heavy|semib/i.test(fontName) || /bold|black|heavy|semib/i.test(family);
+const BOLD_NAME = /bold|black|heavy|semib|[-,]bd\b/i;
+
+/** Resolve the real embedded font names (e.g. "AAAAAA+Arial-Bold") for a page. */
+async function boldFontIds(page: pdfjs.PDFPageProxy, fontIds: string[]): Promise<Set<string>> {
+  const bold = new Set<string>();
+  try {
+    await page.getOperatorList();
+    for (const id of fontIds) {
+      let obj: unknown;
+      try {
+        obj = (page as unknown as { commonObjs: { get(k: string): unknown } }).commonObjs.get(id);
+      } catch {
+        continue;
+      }
+      const font = (obj as { font?: { name?: string } })?.font ?? (obj as { name?: string });
+      const name = (font as { name?: string })?.name ?? "";
+      if (BOLD_NAME.test(name) || BOLD_NAME.test(id)) bold.add(id);
+    }
+  } catch {
+    /* ignore, fall back to id heuristic */
+  }
+  for (const id of fontIds) if (BOLD_NAME.test(id)) bold.add(id);
+  return bold;
 }
+
 
 interface LinkRect {
   url: string;
@@ -49,7 +69,7 @@ async function extractPdf(file: File): Promise<string> {
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
-    const styles = content.styles as Record<string, { fontFamily?: string }>;
+    const bold = await boldFontIds(page, Object.keys(content.styles ?? {}));
     const links = await pageLinks(page);
 
     const lines: string[] = [];
@@ -72,7 +92,7 @@ async function extractPdf(file: File): Promise<string> {
       if (link) {
         const label = piece.trim();
         piece = label ? `[${label}](${link.url})` : piece;
-      } else if (isBoldFont(styles, item.fontName) && piece.trim()) {
+      } else if (item.fontName && bold.has(item.fontName) && piece.trim()) {
         const lead = piece.match(/^\s*/)?.[0] ?? "";
         const tail = piece.match(/\s*$/)?.[0] ?? "";
         piece = `${lead}**${piece.trim()}**${tail}`;
