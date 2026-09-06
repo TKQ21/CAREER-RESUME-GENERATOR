@@ -69,7 +69,7 @@ async function extractPdf(file: File): Promise<string> {
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
-    const styles = content.styles as Record<string, { fontFamily?: string }>;
+    const bold = await boldFontIds(page, Object.keys(content.styles ?? {}));
     const links = await pageLinks(page);
 
     const lines: string[] = [];
@@ -92,7 +92,7 @@ async function extractPdf(file: File): Promise<string> {
       if (link) {
         const label = piece.trim();
         piece = label ? `[${label}](${link.url})` : piece;
-      } else if (isBoldFont(styles, item.fontName) && piece.trim()) {
+      } else if (item.fontName && bold.has(item.fontName) && piece.trim()) {
         const lead = piece.match(/^\s*/)?.[0] ?? "";
         const tail = piece.match(/\s*$/)?.[0] ?? "";
         piece = `${lead}**${piece.trim()}**${tail}`;
